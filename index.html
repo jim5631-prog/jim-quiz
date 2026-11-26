@@ -1,0 +1,2365 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Jim 理化｜段考大挑戰-精熟挑戰</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet" />
+  <style>
+    * {
+      font-family: 'Noto Sans TC', -apple-system, BlinkMacSystemFont, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+    input, textarea {
+      user-select: text;
+    }
+    html, body {
+      touch-action: manipulation;
+      background-color: #f1f5f9;
+      overscroll-behavior-y: none;
+    }
+    .option-btn {
+      transition: transform 0.12s cubic-bezier(0.2, 0.8, 0.2, 1), background-color 0.15s, border-color 0.15s, box-shadow 0.15s;
+    }
+    .option-btn:active:not(:disabled) {
+      transform: scale(0.985);
+    }
+    @keyframes popIn {
+      0% { opacity: 0; transform: scale(0.94) translateY(8px); }
+      100% { opacity: 1; transform: scale(1) translateY(0); }
+    }
+    .animate-pop {
+      animation: popIn 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-6px); }
+      40%, 80% { transform: translateX(6px); }
+    }
+    .animate-shake {
+      animation: shake 0.36s ease-in-out;
+    }
+    #scratchpad-canvas {
+      touch-action: none;
+      background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
+      background-size: 20px 20px;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col text-slate-800">
+
+  <!-- 頂部導覽列 -->
+  <header class="bg-slate-900 text-white px-4 py-3 shadow-md sticky top-0 z-30">
+    <div class="max-w-4xl mx-auto flex items-center justify-between gap-2">
+      <div class="flex items-center gap-2.5">
+        <div class="w-9 h-9 rounded-xl bg-indigo-500 flex items-center justify-center font-black text-lg shadow-inner shrink-0">
+          Jim
+        </div>
+        <div>
+          <h1 id="app-main-title" class="font-bold text-base sm:text-lg tracking-wide leading-tight">Jim 理化｜習作類似題-精熟挑戰</h1>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <button id="btn-record-submit" onclick="triggerRecordAndSendScore(false)" class="hidden items-center gap-1.5 bg-emerald-500 hover:bg-emerald-400 active:scale-95 text-slate-950 font-black px-3 py-2 rounded-xl text-xs sm:text-sm shadow transition">
+          <span>📊 闖關記錄（回報分數）</span>
+        </button>
+
+        <button id="btn-toggle-scratchpad" onclick="toggleScratchpad()" class="hidden items-center gap-1.5 bg-amber-500 hover:bg-amber-400 active:scale-95 text-slate-950 font-bold px-3 py-2 rounded-xl text-xs sm:text-sm shadow transition">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+          <span>草稿板</span>
+        </button>
+
+        <button onclick="openTeacherLogin()" class="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 active:scale-95 text-slate-300 hover:text-white transition" title="Jim 管理後臺">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- 主內容容器 -->
+  <main class="flex-1 max-w-4xl w-full mx-auto p-4 sm:p-6 flex flex-col justify-center">
+
+    <!-- 畫面 1：學生登入頁 -->
+    <section id="view-login" class="bg-white rounded-3xl shadow-xl border border-slate-200/80 p-6 sm:p-10 animate-pop">
+      <div class="text-center mb-6">
+        <h2 id="login-exam-title" class="text-2xl sm:text-3xl font-black text-slate-900 mb-2">習作類似題-精熟挑戰</h2>
+        <p class="text-slate-500 text-base sm:text-lg">無論在家或在校，每次上線都是一次全新變數值闖關！</p>
+      </div>
+
+      <!-- 規則與獎勵區塊 -->
+      <div class="mb-6 bg-sky-50/80 border border-sky-200 rounded-2xl p-4 sm:p-5 text-sm sm:text-base text-sky-950 space-y-2 leading-relaxed">
+        <div class="font-black text-base sm:text-lg text-sky-900">📌 闖關規則與獎勵：</div>
+        <div>1. <strong>計分與分數回報：</strong>過一關得 5 分，每次上線回報總分，採計最高分。</div>
+        <div>2. <strong>獎勵：</strong>完成挑戰者可得到<strong class="text-indigo-700">平時成績高分</strong>獎勵與<strong class="text-amber-600">神秘小禮物</strong>！</div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-5">
+        <div>
+          <label class="block text-base sm:text-lg font-black text-slate-800 mb-2">班級</label>
+          <input id="input-class" type="text" placeholder="例如：909 或 918" class="w-full text-xl sm:text-2xl font-bold px-4 py-3.5 rounded-2xl border-2 border-slate-200 focus:border-indigo-500 focus:outline-none bg-slate-50 focus:bg-white transition" />
+        </div>
+        <div>
+          <label class="block text-base sm:text-lg font-black text-slate-800 mb-2">座號</label>
+          <input id="input-seat" type="tel" inputmode="numeric" placeholder="例如：20" class="w-full text-xl sm:text-2xl font-bold px-4 py-3.5 rounded-2xl border-2 border-slate-200 focus:border-indigo-500 focus:outline-none bg-slate-50 focus:bg-white transition" />
+        </div>
+        <div>
+          <label class="block text-base sm:text-lg font-black text-slate-800 mb-2">姓名</label>
+          <input id="input-name" type="text" placeholder="請輸入真實姓名" class="w-full text-xl sm:text-2xl font-bold px-4 py-3.5 rounded-2xl border-2 border-slate-200 focus:border-indigo-500 focus:outline-none bg-slate-50 focus:bg-white transition" />
+        </div>
+      </div>
+
+      <div id="login-error" class="hidden mb-4 p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 text-sm sm:text-base font-bold text-center"></div>
+
+      <div class="bg-slate-50 rounded-2xl p-4 mb-6 border border-slate-200/70 flex flex-wrap items-center justify-between gap-3 text-sm sm:text-base text-slate-600">
+        <div class="flex items-center gap-2">
+          <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+          <span>本次題庫共 <strong id="total-stages-count" class="text-slate-900">31</strong> 道關卡（滿分 <strong id="total-max-score" class="text-indigo-700">155</strong> 分）</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
+          <span>答錯請續作新變數值類似題，一關通過方可進下一關</span>
+        </div>
+      </div>
+
+      <button onclick="startNewChallenge()" class="w-full py-4 sm:py-5 rounded-2xl bg-indigo-600 hover:bg-indigo-500 active:scale-[0.99] text-white font-black text-xl shadow-lg shadow-indigo-200 transition flex items-center justify-center gap-2">
+        <span>開始本次闖關挑戰</span>
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+      </button>
+    </section>
+
+    <!-- 畫面 2：學生平板闖關作答區 -->
+    <section id="view-quiz" class="hidden w-full flex-col gap-4 animate-pop">
+      <!-- 狀態儀表板：已過幾關、即時積分 -->
+      <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200/80 space-y-2.5">
+        <div class="flex flex-wrap items-center justify-between gap-2 text-sm font-bold">
+          <div class="flex items-center gap-2">
+            <span id="student-badge" class="px-2.5 py-0.5 rounded-lg bg-slate-100 text-slate-700">909 20號 王小明</span>
+            <span id="code-badge" class="px-2.5 py-0.5 rounded-lg bg-indigo-50 text-indigo-700 font-mono">編號：90920</span>
+            <span id="streak-badge" class="hidden px-2.5 py-0.5 rounded-lg bg-amber-100 text-amber-800">🔥 連對 2 題</span>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-3">
+            <span class="px-3 py-1 rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-200 font-black text-sm sm:text-base">
+              🏆 目前積分：<span id="current-score" class="text-emerald-600 text-lg">0</span> 分
+            </span>
+            <span class="text-indigo-700 font-black text-sm sm:text-base">
+              已過 <span id="completed-count">0</span> / <span id="max-stage-num">31</span> 關（剩 <span id="remaining-count">31</span> 題）
+            </span>
+          </div>
+        </div>
+
+        <div class="w-full h-3 bg-slate-100 rounded-full overflow-hidden">
+          <div id="progress-bar" class="h-full bg-indigo-600 rounded-full transition-all duration-300" style="width: 0%"></div>
+        </div>
+
+        <div class="bg-indigo-50/80 border border-indigo-100 rounded-xl px-3.5 py-2 text-xs sm:text-sm font-bold text-indigo-900 flex flex-wrap items-center justify-between gap-2">
+          <span id="encouragement-text">💪 過一關得 5 分，每次上線回報總分，採計最高分！</span>
+          <span class="text-indigo-700 shrink-0">準備離線前請記得點右上角「📊 闖關記錄」回報分數</span>
+        </div>
+      </div>
+
+      <!-- 主題目卡片（含「現在時間」提醒） -->
+      <div id="question-card" class="bg-white rounded-3xl p-6 sm:p-8 shadow-lg border border-slate-200/80">
+        <div class="flex flex-wrap items-center justify-between gap-2 mb-4 pb-3 border-b border-slate-100">
+          <div class="flex flex-wrap items-center gap-2">
+            <span id="question-concept-tag" class="px-3 py-1 rounded-xl bg-indigo-50 text-indigo-700 font-bold text-xs sm:text-sm border border-indigo-100">
+              題型分類
+            </span>
+            <span id="variant-tag" class="px-2.5 py-1 rounded-lg bg-slate-100 text-slate-500 font-medium text-xs">
+              隨機變數值・每關 5 分
+            </span>
+          </div>
+
+          <!-- 每一題題目旁的「現在時間」提醒 -->
+          <div class="px-3 py-1 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 font-mono font-bold text-xs sm:text-sm flex items-center gap-1.5">
+            <span>🕒 現在時間：</span>
+            <span id="question-live-clock">--:--:--</span>
+          </div>
+        </div>
+
+        <div id="question-text" class="text-xl sm:text-2xl font-bold text-slate-900 leading-relaxed mb-5 whitespace-pre-line">
+          題目載入中...
+        </div>
+
+        <div id="question-figure-box" class="hidden mb-6 flex justify-center"></div>
+
+        <div id="options-container" class="grid grid-cols-1 gap-3.5"></div>
+
+        <div id="feedback-box" class="hidden mt-6 rounded-2xl p-5 sm:p-6 border-2 animate-pop">
+          <div class="flex items-start gap-3 mb-3">
+            <div id="feedback-icon" class="w-8 h-8 rounded-full flex items-center justify-center shrink-0 font-black text-lg mt-0.5"></div>
+            <div>
+              <h4 id="feedback-title" class="font-black text-lg sm:text-xl"></h4>
+              <p id="feedback-subtitle" class="text-sm font-medium mt-0.5"></p>
+            </div>
+          </div>
+
+          <div class="bg-white/90 rounded-xl p-4 border border-slate-200/80 text-slate-800 text-base leading-relaxed mb-5">
+            <div class="text-xs font-black uppercase tracking-wider text-indigo-600 mb-1">💡 老師詳解與單位提醒</div>
+            <div id="explanation-text"></div>
+          </div>
+
+          <button id="btn-next-action" onclick="handleNextStep()" class="w-full py-4 rounded-2xl font-black text-lg text-white shadow-md transition active:scale-[0.99] flex items-center justify-center gap-2">
+            <span>繼續下一關</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 畫面 3：闖關記錄與成績結算頁 -->
+    <section id="view-record" class="hidden bg-white rounded-3xl shadow-xl border border-slate-200/80 p-6 sm:p-8 animate-pop">
+      <div class="text-center mb-6">
+        <div id="record-top-icon" class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-indigo-100 text-indigo-600 mb-3 text-3xl">
+          📊
+        </div>
+        <h2 id="record-main-title" class="text-2xl sm:text-3xl font-black text-slate-900 mb-1">本次闖關記錄與總分</h2>
+        <p id="record-subtitle" class="text-slate-600 text-sm sm:text-base">
+          請先查看你的闖關記錄與總分（採計最高分），按「傳送總分給 Jim 老師」會在背景自動送出。
+        </p>
+      </div>
+
+      <!-- 背景送出狀態通知橫幅 -->
+      <div id="submit-status-banner" class="hidden max-w-2xl mx-auto mb-5 rounded-2xl p-4 border-2 text-sm sm:text-base font-bold animate-pop"></div>
+
+      <!-- 成績總覽卡片 -->
+      <div class="max-w-2xl mx-auto grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6 text-center">
+        <div class="bg-emerald-50 border border-emerald-200 rounded-2xl p-3.5">
+          <div class="text-xs font-bold text-emerald-700 mb-1">本次總分</div>
+          <div class="text-2xl sm:text-3xl font-black text-emerald-600"><span id="rec-score">0</span> 分</div>
+        </div>
+        <div class="bg-indigo-50 border border-indigo-200 rounded-2xl p-3.5">
+          <div class="text-xs font-bold text-indigo-700 mb-1">已通過關數</div>
+          <div class="text-2xl sm:text-3xl font-black text-indigo-600"><span id="rec-passed">0</span> / <span id="rec-total">31</span></div>
+        </div>
+        <div class="bg-amber-50 border border-amber-200 rounded-2xl p-3.5">
+          <div class="text-xs font-bold text-amber-700 mb-1">總作答次數</div>
+          <div class="text-2xl sm:text-3xl font-black text-amber-600"><span id="rec-attempts">0</span> 次</div>
+        </div>
+        <div class="bg-slate-50 border border-slate-200 rounded-2xl p-3.5">
+          <div class="text-xs font-bold text-slate-600 mb-1">本次耗時</div>
+          <div class="text-xl sm:text-2xl font-black text-slate-800 mt-1" id="rec-duration">0秒</div>
+        </div>
+      </div>
+
+      <!-- 全部闖關完成：專屬神秘小禮物兌換卡 -->
+      <div id="mystery-gift-box" class="hidden max-w-2xl mx-auto mb-6 rounded-3xl p-6 bg-gradient-to-r from-amber-100 via-yellow-50 to-amber-100 border-2 border-amber-400 shadow-lg text-center animate-pop">
+        <div class="text-4xl mb-2">🎁✨</div>
+        <h3 class="text-xl sm:text-2xl font-black text-amber-950 mb-1">恭喜完成全部挑戰！</h3>
+        <p class="text-sm sm:text-base font-bold text-amber-900 mb-3">
+          完成挑戰者可得到<span class="text-indigo-700">平時成績高分</span>獎勵與<span class="text-amber-600">神秘小禮物</span>！請憑下方兌換碼向 Jim 老師領取：
+        </p>
+        <div class="inline-block bg-white px-5 py-2.5 rounded-2xl border-2 border-amber-400 font-mono font-black text-lg text-indigo-700 shadow-inner">
+          神秘禮物兌換碼：<span id="gift-verify-code">JIM-90920-XXXX</span>
+        </div>
+      </div>
+
+      <!-- 回報分數與繼續作答操作區 -->
+      <div class="max-w-2xl mx-auto grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
+        <button id="btn-back-to-quiz" onclick="returnToQuizFromRecord()" class="py-3.5 px-5 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-base shadow transition">
+          ◀ 繼續往下闖關賺積分
+        </button>
+        <button id="btn-send-score-bg" onclick="submitScoreNow()" class="py-3.5 px-5 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-black text-base shadow transition">
+          📤 傳送總分給 Jim 老師（背景送出）
+        </button>
+      </div>
+
+      <!-- 學生自己看的個人闖關記錄明細（不傳給老師） -->
+      <div class="max-w-2xl mx-auto bg-slate-50 rounded-2xl p-4 sm:p-5 border border-slate-200 mb-6">
+        <div class="flex flex-wrap items-center justify-between gap-2 mb-3 pb-2 border-b border-slate-200">
+          <div class="font-black text-slate-800 text-base">📋 個人闖關記錄（僅供自己檢視，不用傳給老師）</div>
+          <div id="rec-student-label" class="text-xs font-bold text-slate-500"></div>
+        </div>
+        <div id="record-detail-list" class="max-h-64 overflow-y-auto space-y-2 text-sm"></div>
+      </div>
+
+      <div class="text-center">
+        <button onclick="resetToHome()" class="text-sm font-bold text-slate-500 hover:text-slate-700 underline">
+          🔄 重新開始一次全新闖關（或換下一位同學）
+        </button>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- 浮動計算草稿板 -->
+  <div id="scratchpad-drawer" class="hidden fixed inset-x-0 bottom-0 z-40 bg-white border-t-2 border-slate-300 shadow-2xl rounded-t-3xl p-4 sm:p-5 animate-pop">
+    <div class="max-w-4xl mx-auto">
+      <div class="flex items-center justify-between mb-2.5">
+        <div class="flex items-center gap-2">
+          <span class="font-black text-slate-800 text-base">✏️ 隨手計算草稿板</span>
+          <span class="text-xs text-slate-500 hidden sm:inline">可直接用手指或觸控筆列式換算單位</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <button onclick="setPenColor('#1e293b')" class="w-7 h-7 rounded-full bg-slate-800 border-2 border-white ring-2 ring-slate-300" title="黑筆"></button>
+          <button onclick="setPenColor('#dc2626')" class="w-7 h-7 rounded-full bg-red-600 border-2 border-white ring-2 ring-red-200" title="紅筆"></button>
+          <button onclick="setPenColor('#2563eb')" class="w-7 h-7 rounded-full bg-blue-600 border-2 border-white ring-2 ring-blue-200" title="藍筆"></button>
+          <button onclick="clearScratchpad()" class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs ml-1">清空畫布</button>
+          <button onclick="toggleScratchpad()" class="px-3 py-1.5 rounded-xl bg-slate-800 text-white font-bold text-xs">收起</button>
+        </div>
+      </div>
+      <canvas id="scratchpad-canvas" class="w-full h-48 sm:h-56 rounded-2xl border-2 border-slate-300 bg-slate-50 cursor-crosshair"></canvas>
+    </div>
+  </div>
+
+  <!-- Jim 管理後臺 Modal -->
+  <div id="teacher-modal" class="hidden fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+    <div class="bg-white rounded-3xl max-w-3xl w-full p-6 sm:p-8 shadow-2xl max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between pb-4 border-b border-slate-200 mb-5">
+        <div>
+          <h3 class="text-xl font-black text-slate-900">⚙️ Jim 管理後臺</h3>
+          <p class="text-xs text-slate-500">設定題庫、Google 表單連結或匯出獨立網頁檔（儲存後視窗會保留，方便接著匯出）</p>
+        </div>
+        <button onclick="closeTeacherModal()" class="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold">✕</button>
+      </div>
+
+      <div id="teacher-auth-box" class="py-6 text-center max-w-sm mx-auto">
+        <label class="block text-sm font-bold text-slate-700 mb-2">請輸入 Jim 管理後臺密碼</label>
+        <input id="teacher-pwd-input" type="password" placeholder="輸入密碼" class="w-full text-center text-lg font-bold px-4 py-3 rounded-2xl border-2 border-slate-200 focus:border-indigo-500 focus:outline-none mb-3" />
+        <button onclick="verifyTeacherPwd()" class="w-full py-3 rounded-2xl bg-indigo-600 text-white font-bold">進入後臺</button>
+      </div>
+
+      <div id="teacher-panel-box" class="hidden space-y-6">
+        <div class="bg-amber-50 border border-amber-200 rounded-2xl p-4 flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <div class="text-sm font-black text-amber-950">⚡ 管理者流程測試捷徑</div>
+            <div class="text-xs text-amber-800">直接模擬全部闖關完成，檢查回報總分、個人記錄與神秘小禮物畫面</div>
+          </div>
+          <button onclick="jumpToCompletionForAdmin()" class="px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs sm:text-sm shadow transition">
+            一鍵到最後（檢視全破與神秘禮物）➔
+          </button>
+        </div>
+
+        <div>
+          <label class="block text-sm font-bold text-slate-800 mb-1">1. 本次挑戰名稱</label>
+          <input id="cfg-exam-title" type="text" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 font-bold text-slate-800" />
+        </div>
+
+        <div class="bg-emerald-50/70 p-4 rounded-2xl border border-emerald-200 space-y-2">
+          <label class="block text-sm font-bold text-emerald-950">2. Google 表單預先填入連結（建議貼上含 entry. 欄位的連結，背景自動送出）</label>
+          <input id="cfg-google-form-url" type="url" placeholder="https://docs.google.com/forms/d/e/.../viewform?usp=pp_url&entry.xxx=...&entry.yyy=..." class="w-full px-3.5 py-2.5 rounded-xl border border-emerald-300 bg-white text-xs font-mono" />
+          <p class="text-xs text-emerald-800">從表單右上角「⋮ → 預先填寫表單」填入測試值並取得連結後貼入此處，系統會在背景直接送出至 <code>formResponse</code>。</p>
+        </div>
+
+        <div class="bg-indigo-50/70 p-4 rounded-2xl border border-indigo-100">
+          <label class="block text-sm font-bold text-indigo-950 mb-1">3. 備援教師信箱</label>
+          <input id="cfg-teacher-email" type="email" class="w-full px-3.5 py-2.5 rounded-xl border border-indigo-200 bg-white text-sm font-mono font-bold" />
+        </div>
+
+        <div>
+          <div class="flex items-center justify-between mb-1">
+            <label class="block text-sm font-bold text-slate-800">4. 題庫管理（JSON 格式，支援每題多組數值/單位變形與圖形）</label>
+            <button onclick="restoreDefaultQuestions()" class="text-xs font-bold text-indigo-600 hover:underline">恢復習作原題變形題庫</button>
+          </div>
+          <textarea id="cfg-questions-json" rows="9" class="w-full p-3.5 rounded-xl border border-slate-300 font-mono text-xs bg-slate-50 focus:bg-white"></textarea>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+          <button onclick="saveTeacherConfig()" class="py-3.5 px-4 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-black text-sm shadow">
+            💾 儲存設定（保留視窗）
+          </button>
+          <button onclick="exportStandaloneHTML()" class="py-3.5 px-4 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white font-black text-sm shadow">
+            📦 匯出含新題庫之獨立 HTML 檔（派送學生用）
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 隱藏的背景表單送出容器 -->
+  <iframe id="bg-form-target" name="bg-form-target" class="hidden" aria-hidden="true"></iframe>
+  <form id="bg-form-sender" method="POST" target="bg-form-target" class="hidden" aria-hidden="true"></form>
+
+  <script>
+    const SVG_FIGURES = {
+      f16_card: (w, f, v) => `<svg viewBox="0 0 360 155" class="w-full max-w-sm bg-white border-2 border-slate-800 rounded-xl">
+        <rect x="0" y="0" width="360" height="36" fill="#1e293b"/>
+        <text x="180" y="24" text-anchor="middle" fill="#ffffff" font-size="16" font-weight="bold">F-16 戰鬥機規格</text>
+        <text x="35" y="70" fill="#0f172a" font-size="16" font-weight="bold">重  量：${w}</text>
+        <text x="35" y="102" fill="#0f172a" font-size="16" font-weight="bold">起飛推力：${f}</text>
+        <text x="35" y="134" fill="#0f172a" font-size="16" font-weight="bold">起飛速率：${v}</text>
+      </svg>`,
+
+      orbit: `<svg viewBox="0 0 380 210" class="w-full max-w-sm bg-white border border-slate-200 rounded-xl p-2">
+        <ellipse cx="195" cy="105" rx="155" ry="75" fill="none" stroke="#334155" stroke-width="2" stroke-dasharray="5,4"/>
+        <circle cx="135" cy="105" r="22" fill="#f59e0b" stroke="#b45309" stroke-width="2"/>
+        <text x="135" y="110" text-anchor="middle" font-size="12" font-weight="bold" fill="#0f172a">太陽</text>
+        <circle cx="350" cy="105" r="8" fill="#1e293b"/>
+        <text x="362" y="110" font-size="14" font-weight="bold" fill="#0f172a">甲</text>
+        <line x1="157" y1="105" x2="342" y2="105" stroke="#0f172a" stroke-width="1.5"/>
+        <text x="245" y="98" font-size="13" font-weight="bold" fill="#1d4ed8">R甲</text>
+        <circle cx="220" cy="31" r="8" fill="#1e293b"/>
+        <text x="220" y="20" text-anchor="middle" font-size="14" font-weight="bold" fill="#0f172a">乙</text>
+        <line x1="148" y1="87" x2="215" y2="37" stroke="#0f172a" stroke-width="1.5"/>
+        <text x="165" y="55" font-size="13" font-weight="bold" fill="#1d4ed8">R乙</text>
+        <circle cx="40" cy="105" r="8" fill="#1e293b"/>
+        <text x="22" y="110" font-size="14" font-weight="bold" fill="#0f172a">丙</text>
+        <line x1="48" y1="105" x2="113" y2="105" stroke="#0f172a" stroke-width="1.5"/>
+        <text x="72" y="98" font-size="13" font-weight="bold" fill="#1d4ed8">R丙</text>
+      </svg>`,
+
+      swing: `<svg viewBox="0 0 360 230" class="w-full max-w-sm bg-white border border-slate-200 rounded-xl p-2">
+        <rect x="145" y="10" width="70" height="14" fill="#94a3b8" stroke="#1e293b" stroke-width="1.5"/>
+        <line x1="180" y1="24" x2="180" y2="145" stroke="#64748b" stroke-width="1.5" stroke-dasharray="4,4"/>
+        <ellipse cx="180" cy="145" rx="125" ry="42" fill="none" stroke="#334155" stroke-width="2" stroke-dasharray="5,4"/>
+        <circle cx="180" cy="145" r="4" fill="#0f172a"/>
+        <text x="165" y="143" font-size="14" font-weight="bold" fill="#0f172a">O</text>
+        <line x1="180" y1="24" x2="235" y2="178" stroke="#1e293b" stroke-width="2"/>
+        <rect x="225" y="170" width="20" height="18" rx="4" fill="#cbd5e1" stroke="#0f172a" stroke-width="2"/>
+        <text x="242" y="164" font-size="14" font-weight="bold" fill="#0f172a">M</text>
+        <line x1="225" y1="172" x2="190" y2="151" stroke="#dc2626" stroke-width="2.5"/>
+        <polygon points="187,149 197,150 192,158" fill="#dc2626"/>
+        <text x="195" y="172" font-size="13" font-weight="bold" fill="#dc2626">丁</text>
+        <line x1="245" y1="185" x2="280" y2="206" stroke="#0f172a" stroke-width="2"/>
+        <polygon points="284,208 274,207 279,199" fill="#0f172a"/>
+        <text x="285" y="216" font-size="13" font-weight="bold" fill="#0f172a">乙</text>
+        <line x1="245" y1="178" x2="295" y2="168" stroke="#0f172a" stroke-width="2"/>
+        <polygon points="300,167 290,164 292,174" fill="#0f172a"/>
+        <text x="304" y="172" font-size="13" font-weight="bold" fill="#0f172a">甲</text>
+        <line x1="225" y1="182" x2="175" y2="192" stroke="#0f172a" stroke-width="2"/>
+        <polygon points="170,193 180,196 178,186" fill="#0f172a"/>
+        <text x="155" y="200" font-size="13" font-weight="bold" fill="#0f172a">丙</text>
+        <text x="30" y="212" font-size="12" fill="#475569">↻ 旋轉方向（逆時鐘俯視）</text>
+      </svg>`,
+
+      astronaut: `<svg viewBox="0 0 360 180" class="w-full max-w-sm bg-slate-900 border border-slate-700 rounded-xl p-2">
+        <rect x="15" y="15" width="85" height="150" rx="8" fill="#e2e8f0" stroke="#94a3b8" stroke-width="2"/>
+        <rect x="28" y="30" width="58" height="120" rx="18" fill="none" stroke="#475569" stroke-width="2"/>
+        <text x="57" y="95" text-anchor="middle" font-size="15" font-weight="bold" fill="#0f172a">太空艙門</text>
+        <circle cx="235" cy="52" r="16" fill="#ffffff"/>
+        <rect x="225" y="45" width="20" height="11" rx="4" fill="#38bdf8"/>
+        <rect x="218" y="70" width="34" height="44" rx="8" fill="#ffffff"/>
+        <line x1="218" y1="78" x2="198" y2="98" stroke="#ffffff" stroke-width="7" stroke-linecap="round"/>
+        <line x1="252" y1="78" x2="272" y2="98" stroke="#ffffff" stroke-width="7" stroke-linecap="round"/>
+        <line x1="226" y1="114" x2="222" y2="148" stroke="#ffffff" stroke-width="8" stroke-linecap="round"/>
+        <line x1="244" y1="114" x2="248" y2="148" stroke="#ffffff" stroke-width="8" stroke-linecap="round"/>
+        <line x1="185" y1="92" x2="125" y2="92" stroke="#facc15" stroke-width="3"/>
+        <polygon points="118,92 130,86 130,98" fill="#facc15"/>
+        <text x="152" y="80" text-anchor="middle" font-size="16" font-weight="bold" fill="#facc15">甲</text>
+        <line x1="285" y1="92" x2="335" y2="92" stroke="#facc15" stroke-width="3"/>
+        <polygon points="342,92 330,86 330,98" fill="#facc15"/>
+        <text x="310" y="80" text-anchor="middle" font-size="16" font-weight="bold" fill="#facc15">乙</text>
+      </svg>`,
+
+      umbrella: `<svg viewBox="0 0 340 230" class="w-full max-w-sm bg-white border border-slate-200 rounded-xl p-2">
+        <circle cx="170" cy="120" r="82" fill="#f8fafc" stroke="#334155" stroke-width="2" stroke-dasharray="6,4"/>
+        <circle cx="170" cy="120" r="4" fill="#0f172a"/>
+        <line x1="170" y1="38" x2="170" y2="202" stroke="#cbd5e1" stroke-width="1.5"/>
+        <line x1="88" y1="120" x2="252" y2="120" stroke="#cbd5e1" stroke-width="1.5"/>
+        <line x1="112" y1="62" x2="228" y2="178" stroke="#cbd5e1" stroke-width="1.5"/>
+        <line x1="228" y1="62" x2="112" y2="178" stroke="#cbd5e1" stroke-width="1.5"/>
+        <path d="M 115 65 A 78 78 0 0 0 92 120" fill="none" stroke="#2563eb" stroke-width="2.5"/>
+        <polygon points="92,124 87,114 97,114" fill="#2563eb"/>
+        <text x="32" y="80" font-size="12" font-weight="bold" fill="#2563eb">逆時鐘旋轉</text>
+        <circle cx="170" cy="38" r="5" fill="#dc2626"/>
+        <text x="182" y="54" font-size="14" font-weight="bold" fill="#dc2626">甲</text>
+        <line x1="170" y1="38" x2="170" y2="10" stroke="#0f172a" stroke-width="2"/>
+        <polygon points="170,5 166,14 174,14" fill="#0f172a"/>
+        <text x="178" y="16" font-size="13" font-weight="bold">a</text>
+        <line x1="170" y1="38" x2="170" y2="75" stroke="#0f172a" stroke-width="2"/>
+        <polygon points="170,80 166,71 174,71" fill="#0f172a"/>
+        <text x="178" y="82" font-size="13" font-weight="bold">d</text>
+        <line x1="170" y1="38" x2="220" y2="38" stroke="#0f172a" stroke-width="2"/>
+        <polygon points="225,38 216,34 216,42" fill="#0f172a"/>
+        <text x="228" y="42" font-size="13" font-weight="bold">b</text>
+        <line x1="170" y1="38" x2="120" y2="38" stroke="#0f172a" stroke-width="2"/>
+        <polygon points="115,38 124,34 124,42" fill="#0f172a"/>
+        <text x="104" y="42" font-size="13" font-weight="bold">c</text>
+      </svg>`,
+
+      vt_q11: `<svg viewBox="0 0 420 220" class="w-full max-w-md bg-white border border-slate-200 rounded-xl p-2">
+        <line x1="55" y1="180" x2="390" y2="180" stroke="#0f172a" stroke-width="2.5"/>
+        <line x1="55" y1="180" x2="55" y2="25" stroke="#0f172a" stroke-width="2.5"/>
+        <polygon points="390,180 380,175 380,185" fill="#0f172a"/>
+        <polygon points="55,25 50,35 60,35" fill="#0f172a"/>
+        <text x="392" y="198" font-size="14" font-weight="bold" fill="#0f172a">t(s)</text>
+        <text x="12" y="30" font-size="14" font-weight="bold" fill="#0f172a">v(m/s)</text>
+        <line x1="50" y1="50" x2="60" y2="50" stroke="#334155" stroke-width="1.5"/>
+        <text x="22" y="55" font-size="13" fill="#334155">20</text>
+        <line x1="50" y1="115" x2="60" y2="115" stroke="#334155" stroke-width="1.5"/>
+        <text x="22" y="120" font-size="13" fill="#334155">10</text>
+        <text x="40" y="198" font-size="13" fill="#334155">0</text>
+        <text x="160" y="198" font-size="13" fill="#334155">4</text>
+        <text x="265" y="198" font-size="13" fill="#334155">8</text>
+        <text x="315" y="198" font-size="13" font-weight="bold" fill="#334155">10</text>
+        <line x1="165" y1="115" x2="165" y2="180" stroke="#94a3b8" stroke-dasharray="4,4"/>
+        <line x1="270" y1="115" x2="270" y2="180" stroke="#94a3b8" stroke-dasharray="4,4"/>
+        <line x1="322" y1="50" x2="322" y2="180" stroke="#94a3b8" stroke-dasharray="4,4"/>
+        <line x1="55" y1="50" x2="322" y2="50" stroke="#94a3b8" stroke-dasharray="4,4"/>
+        <line x1="55" y1="115" x2="270" y2="115" stroke="#94a3b8" stroke-dasharray="4,4"/>
+        <polyline points="55,50 165,115 270,115 322,50" fill="none" stroke="#1d4ed8" stroke-width="3.5"/>
+      </svg>`,
+
+      xt_q12: `<svg viewBox="0 0 430 230" class="w-full max-w-md bg-white border border-slate-200 rounded-xl p-2">
+        <line x1="55" y1="190" x2="395" y2="190" stroke="#0f172a" stroke-width="2.5"/>
+        <line x1="55" y1="190" x2="55" y2="25" stroke="#0f172a" stroke-width="2.5"/>
+        <polygon points="395,190 385,185 385,195" fill="#0f172a"/>
+        <polygon points="55,25 50,35 60,35" fill="#0f172a"/>
+        <text x="380" y="212" font-size="13" font-weight="bold" fill="#0f172a">t(分鐘)</text>
+        <text x="12" y="28" font-size="13" font-weight="bold" fill="#0f172a">x(公里)</text>
+        <text x="26" y="45" font-size="12">30</text><line x1="55" y1="40" x2="375" y2="40" stroke="#e2e8f0"/>
+        <text x="26" y="70" font-size="12">25</text><line x1="55" y1="65" x2="375" y2="65" stroke="#e2e8f0"/>
+        <text x="26" y="95" font-size="12">20</text><line x1="55" y1="90" x2="375" y2="90" stroke="#e2e8f0"/>
+        <text x="26" y="120" font-size="12">15</text><line x1="55" y1="115" x2="375" y2="115" stroke="#e2e8f0"/>
+        <text x="26" y="145" font-size="12">10</text><line x1="55" y1="140" x2="375" y2="140" stroke="#e2e8f0"/>
+        <text x="32" y="170" font-size="12">5</text><line x1="55" y1="165" x2="375" y2="165" stroke="#e2e8f0"/>
+        <text x="45" y="206" font-size="11">0</text>
+        <text x="110" y="206" font-size="11">20</text><line x1="117" y1="40" x2="117" y2="190" stroke="#e2e8f0"/>
+        <text x="172" y="206" font-size="11">40</text><line x1="179" y1="40" x2="179" y2="190" stroke="#e2e8f0"/>
+        <text x="234" y="206" font-size="11">60</text><line x1="241" y1="40" x2="241" y2="190" stroke="#e2e8f0"/>
+        <text x="265" y="206" font-size="11">70</text><line x1="272" y1="40" x2="272" y2="190" stroke="#e2e8f0"/>
+        <text x="356" y="206" font-size="11">100</text><line x1="365" y1="40" x2="365" y2="190" stroke="#e2e8f0"/>
+        <polyline points="55,190 117,90 179,90 241,40 272,40 365,115" fill="none" stroke="#0f766e" stroke-width="3.5"/>
+      </svg>`,
+
+      block_force: (fLeft, fRight, labelText) => `<svg viewBox="0 0 380 120" class="w-full max-w-sm bg-white border border-slate-200 rounded-xl p-2">
+        <line x1="25" y1="85" x2="355" y2="85" stroke="#334155" stroke-width="2.5"/>
+        <rect x="145" y="35" width="90" height="50" rx="4" fill="#e2e8f0" stroke="#0f172a" stroke-width="2"/>
+        <text x="190" y="65" text-anchor="middle" font-size="14" font-weight="bold" fill="#0f172a">木塊</text>
+        <line x1="145" y1="60" x2="80" y2="60" stroke="#dc2626" stroke-width="2.5"/>
+        <polygon points="73,60 84,55 84,65" fill="#dc2626"/>
+        <text x="108" y="48" text-anchor="middle" font-size="14" font-weight="bold" fill="#dc2626">${fLeft}</text>
+        <line x1="235" y1="60" x2="300" y2="60" stroke="#2563eb" stroke-width="2.5"/>
+        <polygon points="307,60 296,55 296,65" fill="#2563eb"/>
+        <text x="272" y="48" text-anchor="middle" font-size="14" font-weight="bold" fill="#2563eb">${fRight}</text>
+        <text x="190" y="108" text-anchor="middle" font-size="13" font-weight="bold" fill="#334155">${labelText}</text>
+      </svg>`,
+
+      push_block: (fLabel, sLabel) => `<svg viewBox="0 0 380 125" class="w-full max-w-sm bg-white border border-slate-200 rounded-xl p-2">
+        <line x1="25" y1="85" x2="355" y2="85" stroke="#334155" stroke-width="2.5"/>
+        <rect x="95" y="38" width="60" height="47" fill="#cbd5e1" stroke="#0f172a" stroke-width="2"/>
+        <text x="125" y="67" text-anchor="middle" font-size="15" font-weight="bold">M</text>
+        <rect x="235" y="38" width="60" height="47" fill="none" stroke="#64748b" stroke-width="2" stroke-dasharray="4,4"/>
+        <text x="265" y="67" text-anchor="middle" font-size="15" fill="#64748b">M</text>
+        <line x1="40" y1="62" x2="90" y2="62" stroke="#dc2626" stroke-width="3"/>
+        <polygon points="95,62 85,57 85,67" fill="#dc2626"/>
+        <text x="65" y="50" text-anchor="middle" font-size="14" font-weight="bold" fill="#dc2626">${fLabel}</text>
+        <line x1="125" y1="100" x2="265" y2="100" stroke="#0f172a" stroke-width="1.5"/>
+        <line x1="125" y1="94" x2="125" y2="106" stroke="#0f172a" stroke-width="1.5"/>
+        <line x1="265" y1="94" x2="265" y2="106" stroke="#0f172a" stroke-width="1.5"/>
+        <text x="195" y="116" text-anchor="middle" font-size="14" font-weight="bold" fill="#0f172a">${sLabel}</text>
+      </svg>`,
+
+      basketball: `<svg viewBox="0 0 400 200" class="w-full max-w-md bg-white border border-slate-200 rounded-xl p-2">
+        <line x1="15" y1="175" x2="385" y2="175" stroke="#334155" stroke-width="3"/>
+        <text x="355" y="192" font-size="13" font-weight="bold" fill="#334155">地面</text>
+        <line x1="355" y1="45" x2="355" y2="175" stroke="#0f172a" stroke-width="4"/>
+        <line x1="355" y1="40" x2="355" y2="85" stroke="#0f172a" stroke-width="5"/>
+        <ellipse cx="335" cy="75" rx="14" ry="4" fill="none" stroke="#ea580c" stroke-width="2.5"/>
+        <path d="M 45 115 Q 195 5 335 72" fill="none" stroke="#94a3b8" stroke-width="2" stroke-dasharray="4,4"/>
+        <path d="M 335 72 Q 305 32 285 45 Q 245 75 215 175" fill="none" stroke="#2563eb" stroke-width="2.5"/>
+        <path d="M 215 175 Q 175 95 135 175" fill="none" stroke="#2563eb" stroke-width="2.5"/>
+        <path d="M 135 175 Q 112 135 90 175" fill="none" stroke="#2563eb" stroke-width="2.5"/>
+        <circle cx="292" cy="43" r="4.5" fill="#dc2626"/><text x="292" y="33" text-anchor="middle" font-size="14" font-weight="bold" fill="#dc2626">A</text>
+        <circle cx="215" cy="175" r="4.5" fill="#dc2626"/><text x="215" y="193" text-anchor="middle" font-size="14" font-weight="bold" fill="#dc2626">B</text>
+        <circle cx="175" cy="135" r="4.5" fill="#dc2626"/><text x="175" y="124" text-anchor="middle" font-size="14" font-weight="bold" fill="#dc2626">C</text>
+        <circle cx="84" cy="168" r="7" fill="#ea580c"/><text x="68" y="168" font-size="14" font-weight="bold" fill="#dc2626">D</text>
+      </svg>`,
+
+      weightlifting: `<svg viewBox="0 0 340 190" class="w-full max-w-sm bg-white border border-slate-200 rounded-xl p-2">
+        <line x1="40" y1="175" x2="300" y2="175" stroke="#334155" stroke-width="3"/>
+        <line x1="55" y1="36" x2="285" y2="36" stroke="#1e293b" stroke-width="4"/>
+        <rect x="65" y="18" width="14" height="36" rx="2" fill="#334155"/>
+        <rect x="82" y="22" width="10" height="28" rx="2" fill="#64748b"/>
+        <rect x="261" y="18" width="14" height="36" rx="2" fill="#334155"/>
+        <rect x="248" y="22" width="10" height="28" rx="2" fill="#64748b"/>
+        <circle cx="170" cy="68" r="12" fill="#fde68a" stroke="#0f172a" stroke-width="2"/>
+        <rect x="154" y="82" width="32" height="44" rx="6" fill="#2563eb" stroke="#0f172a" stroke-width="2"/>
+        <polyline points="154,88 128,64 128,36" fill="none" stroke="#0f172a" stroke-width="5" stroke-linecap="round"/>
+        <polyline points="186,88 212,64 212,36" fill="none" stroke="#0f172a" stroke-width="5" stroke-linecap="round"/>
+        <line x1="162" y1="126" x2="156" y2="173" stroke="#0f172a" stroke-width="6" stroke-linecap="round"/>
+        <line x1="178" y1="126" x2="184" y2="173" stroke="#0f172a" stroke-width="6" stroke-linecap="round"/>
+        <text x="275" y="165" font-size="12" font-weight="bold" fill="#475569">靜止不動</text>
+      </svg>`,
+
+      waterslide: `<svg viewBox="0 0 380 175" class="w-full max-w-sm bg-white border border-slate-200 rounded-xl p-2">
+        <line x1="25" y1="145" x2="355" y2="145" stroke="#334155" stroke-width="3"/>
+        <line x1="160" y1="35" x2="220" y2="35" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="4,4"/>
+        <path d="M 165 35 Q 115 115 45 145" fill="none" stroke="#0284c7" stroke-width="4"/>
+        <text x="85" y="85" font-size="15" font-weight="bold" fill="#0284c7">甲滑水道</text>
+        <path d="M 215 35 Q 245 115 305 145" fill="none" stroke="#ea580c" stroke-width="4"/>
+        <text x="275" y="85" font-size="15" font-weight="bold" fill="#ea580c">乙滑水道</text>
+        <rect x="165" y="35" width="50" height="110" fill="#f1f5f9" stroke="#64748b" stroke-width="1.5"/>
+        <text x="190" y="95" text-anchor="middle" font-size="13" font-weight="bold" fill="#334155">高度相同</text>
+      </svg>`
+    };
+
+    const DEFAULT_CONFIG = {
+      examTitle: "習作類似題-精熟挑戰",
+      teacherEmail: "jim5631@chjhs.tyc.edu.tw",
+      googleFormPrefillUrl: "https://docs.google.com/forms/d/e/1FAIpQLSeBgjKulR9nd2Hz7ALatCAgZ_q0l3gq6ypfI7SEHsQMo52BhQ/viewform?usp=header",
+      questions: [
+        {
+          id: "w2_g01_1",
+          priority: 1,
+          hasFigure: false,
+          concept: "【必考題組・第1小題】棒球擊球加速度計算",
+          variants: [
+            {
+              question: "【必考棒球題組】客隊投手投出時速144公里的紅中快速直球,質量145公克的球經0.9毫秒接觸時間,回擊出秒速50公尺的反向飛球(1毫秒=0.001秒)。阿郎擊球瞬間,棒球的加速度大小約多少 m/s²?",
+              options: ["100000", "11.11", "100.00", "111111"],
+              answerIndex: 0,
+              explanation: "⚠️ 單位換算：144 km/h = 40 m/s；0.9 ms = 0.0009 s。反向回擊速度變化量 Δv = 50 - (-40) = 90 m/s。|a| = 90 ÷ 0.0009 = 100000 m/s²。"
+            }
+          ]
+        },
+        {
+          id: "w2_g01_2",
+          priority: 2,
+          hasFigure: false,
+          concept: "【必考題組・第2小題】球棒擊球作用力計算",
+          variants: [
+            {
+              question: "【必考棒球題組】已知棒球質量為 145 公克，擊球瞬間棒球的加速度大小約為 100000 m/s²，阿郎揮棒時，球棒擊球的作用力約為多少牛頓?",
+              options: ["1.45×10⁴", "1.61×10³", "1.61×10⁶", "1.45×10⁷"],
+              answerIndex: 0,
+              explanation: "⚠️ 單位換算：145 公克 = 0.145 公斤。F = m × a = 0.145 kg × 100000 m/s² = 14500 N = 1.45×10⁴ 牛頓。"
+            }
+          ]
+        },
+        {
+          id: "w2_g01_3",
+          priority: 3,
+          hasFigure: false,
+          concept: "【必考題組・第3小題】球棒與球的作用力及反作用力比",
+          variants: [
+            {
+              question: "【必考棒球題組】已知球棒的質量870公克、棒球質量145公克，阿郎揮出全壘打時，球棒給予球的作用力大小為F1，球給予球棒的作用力大小為F2，則F1:F2為何?",
+              options: ["1 : 1", "1 : 6", "6 : 1", "無法比較"],
+              answerIndex: 0,
+              explanation: "作用力與反作用力大小永遠相等，與兩物體質量大小無關，故 F1 : F2 = 1 : 1。"
+            },
+            {
+              question: "【必考棒球題組・變數值】若球棒質量為 900 公克、棒球質量為 150 公克，擊球瞬間球棒給球的作用力大小 F1 與球給球棒的作用力大小 F2 之比 F1 : F2 為何?",
+              options: ["1 : 1", "6 : 1", "1 : 6", "3 : 2"],
+              answerIndex: 0,
+              explanation: "作用力與反作用力大小始終相等，F1 : F2 = 1 : 1。"
+            },
+            {
+              question: "【必考棒球題組・觀念辨析】已知球棒質量 850 公克、棒球質量 145 公克，擊球瞬間球棒給予球的作用力大小為 F1，球給予球棒的作用力大小為 F2，下列敘述何者錯誤？",
+              options: [
+                "F1 大於 F2，因為球棒質量大於球質量",
+                "F1 與 F2 大小相等",
+                "F1 與 F2 方向相反",
+                "F1 與 F2 作用在不同物體上"
+              ],
+              answerIndex: 0,
+              explanation: "⚠️ 題目問「錯誤」！作用力與反作用力大小相等，F1 不會大於 F2。"
+            }
+          ]
+        },
+        {
+          id: "w2_q11",
+          hasFigure: true,
+          concept: "【圖形題】v-t 圖合力大小比較與區間合力計算",
+          variants: [
+            {
+              question: "如附圖,一質量為 2 公斤的物體在水平面上做向東的直線運動。若此物體在 t=3、5、9 秒時,所受合力的大小分別為 F3、F5、F9,則其關係為何?",
+              svg: SVG_FIGURES.vt_q11,
+              options: ["F5 < F3 < F9", "F5 < F9 < F3", "F5 < F3 = F9", "F5 = F3 > F9"],
+              answerIndex: 0,
+              explanation: "合力大小與 |a| 成正比：t=3s 時 |a| = 10/4 = 2.5 m/s²（F3=5N）；t=5s 等速 |a| = 0（F5=0N）；t=9s 時 |a| = 10/2 = 5 m/s²（F9=10N）。故 F5 < F3 < F9。"
+            }
+          ]
+        },
+        {
+          id: "w2_q01",
+          hasFigure: true,
+          concept: "【圖形題】F-16 起降規格計算",
+          variants: [
+            {
+              question: "阿康與同學們參觀了漢光演習F-16戰鬥機的起降過程,F-16戰機的資訊如附圖所示,若忽略阻力,請判斷哪一位同學的發言敘述正確?",
+              svg: SVG_FIGURES.f16_card("12000 kgw", "1.2×10⁵ N", "360 km/h"),
+              options: [
+                "小雯:若重力加速度 g=9.8 m/s²,則F-16的重量小於120000牛頓。",
+                "阿康:F-16起飛時的加速度為 100 m/s²",
+                "小軒:F-16從靜止加速到起飛共需要36秒",
+                "沛沛:F-16從靜止加速到起飛共需要1000公尺"
+              ],
+              answerIndex: 0,
+              explanation: "重量 12000 kgw × 9.8 N/kgw = 117600 N < 120000 N（小雯正確）。質量 m = 12000 kg，a = F/m = 10 m/s²；360 km/h = 100 m/s，t = 10 s，s = ½at² = 500 m。"
+            }
+          ]
+        },
+        {
+          id: "w2_q03",
+          hasFigure: true,
+          concept: "【圖形題】行星繞太陽萬有引力與距離關係",
+          variants: [
+            {
+              question: "附圖為一顆行星以橢圓形軌道繞著太陽運行,當行星在甲、乙、丙三個位置時,與太陽的距離分別為 R甲、R乙、R丙,此時兩者之間的萬有引力大小分別為 F甲、F乙、F丙。若運行的過程中,太陽與行星的質量變化忽略不計,且 R甲 > R乙 > R丙,則下列關係何者正確?",
+              svg: SVG_FIGURES.orbit,
+              options: ["F甲 < F乙 < F丙", "F甲 = F乙 = F丙", "F甲 > F乙 > F丙", "F甲 = F乙 ≠ F丙"],
+              answerIndex: 0,
+              explanation: "距離越遠萬有引力越小。R甲 > R乙 > R丙，故 F甲 < F乙 < F丙。"
+            },
+            {
+              question: "附圖為一顆行星以橢圓形軌道繞著太陽運行,當行星在甲、乙、丙三個位置時,與太陽的距離分別為 R甲、R乙、R丙,且 R甲 > R乙 > R丙,則下列萬有引力關係何者錯誤?",
+              svg: SVG_FIGURES.orbit,
+              options: ["F甲 > F乙 > F丙", "F甲 < F乙 < F丙", "F丙 > F乙 > F甲", "F乙 介於 F甲 與 F丙 之間"],
+              answerIndex: 0,
+              explanation: "⚠️ 題目改問「錯誤」！R甲 > R乙 > R丙 時應為 F甲 < F乙 < F丙，故 F甲 > F乙 > F丙 錯誤。"
+            }
+          ]
+        },
+        {
+          id: "w2_q04",
+          hasFigure: true,
+          concept: "【圖形題】旋轉秋千等速率圓周運動向心力方向",
+          variants: [
+            {
+              question: "沛沛在遊樂場中搭乘旋轉秋千,秋千繞著O點做平行地面的等速率圓周運動,如附圖所示。請問當秋千在M處時,其所受到的向心力方向應為下列何者?",
+              svg: SVG_FIGURES.swing,
+              options: ["丁", "甲", "乙", "丙"],
+              answerIndex: 0,
+              explanation: "等速率圓周運動的向心力方向永遠指向圓心 O，在 M 處為丁方向。"
+            },
+            {
+              question: "沛沛在遊樂場中搭乘旋轉秋千,秋千繞著O點做平行地面的等速率圓周運動,如附圖所示。當秋千在M處時,下列關於向心力與運動的敘述何者錯誤？",
+              svg: SVG_FIGURES.swing,
+              options: [
+                "向心力方向為乙（背離圓心向外）",
+                "向心力方向為丁（指向圓心 O）",
+                "向心力方向與切線速度方向垂直",
+                "向心力只改變運動方向，不改變速率"
+              ],
+              answerIndex: 0,
+              explanation: "⚠️ 題目問「錯誤」！向心力指向圓心（丁），並非向外（乙）。"
+            }
+          ]
+        },
+        {
+          id: "w2_q06",
+          hasFigure: true,
+          concept: "【圖形題】太空人返回艙門動力噴氣方向",
+          variants: [
+            {
+              question: "一名太空人在太空艙外進行維修,維修完成後要返回艙內,太空人與艙門的相對位置如圖所示,請問太空人應該要如何使用太空衣上的動力系統,才能順利的回到艙門內呢?",
+              svg: SVG_FIGURES.astronaut,
+              options: [
+                "設定動力系統朝乙方向噴氣",
+                "設定動力系統朝甲方向噴氣",
+                "設定動力系統朝甲方向吸氣",
+                "設定動力系統朝乙方向吸氣"
+              ],
+              answerIndex: 0,
+              explanation: "依牛頓第三運動定律，朝乙方向噴氣會獲得向甲方向的反作用力，順利回到艙門內。"
+            },
+            {
+              question: "一名太空人在太空艙外進行維修,維修完成後要返回艙內,太空人與艙門的相對位置如圖所示,下列敘述何者錯誤？",
+              svg: SVG_FIGURES.astronaut,
+              options: [
+                "朝甲方向噴氣可使太空人向甲方向靠近艙門",
+                "朝乙方向噴氣可使太空人向甲方向靠近艙門",
+                "氣體給太空人的反作用力與噴氣方向相反",
+                "在太空中沒有空氣依然可以靠噴氣反作用力前進"
+              ],
+              answerIndex: 0,
+              explanation: "⚠️ 題目問「錯誤」！朝甲方向噴氣反作用力向乙，會離艙門越來越遠。"
+            }
+          ]
+        },
+        {
+          id: "w2_q10",
+          hasFigure: true,
+          concept: "【圖形題】逆時鐘旋轉雨傘甲點水滴飛離方向",
+          variants: [
+            {
+              question: "逆時鐘旋轉淋溼的雨傘,當轉速加快到某一程度時,甲點的水滴會沿著雨傘邊緣的哪個方向飛離?",
+              svg: SVG_FIGURES.umbrella,
+              options: ["c", "a", "b", "d"],
+              answerIndex: 0,
+              explanation: "雨傘逆時鐘旋轉，甲點在圓周最上方時切線方向向左，即 c 方向。"
+            },
+            {
+              question: "逆時鐘旋轉淋溼的雨傘,當轉速加快到某一程度時,甲點的水滴會沿著 c 方向飛離，下列敘述何者錯誤？",
+              svg: SVG_FIGURES.umbrella,
+              options: [
+                "水滴是受到向外的離心力推開才沿 c 方向飛離",
+                "c 方向為甲點在該瞬間的切線方向",
+                "水滴因慣性維持原有切線速度方向飛離",
+                "當所需向心力大於附著力時水滴便會飛離"
+              ],
+              answerIndex: 0,
+              explanation: "⚠️ 題目問「錯誤」！水滴是因慣性沿切線方向飛出，並非受到向外的離心力。"
+            }
+          ]
+        },
+        {
+          id: "w2_q12",
+          hasFigure: true,
+          concept: "【圖形題】x-t 圖貨物動能大小比較",
+          variants: [
+            {
+              question: "附圖為某貨車在一筆直公路上移動時的位置(x)與時間(t)的關係圖,若貨車上的貨物質量固定不變,請比較貨物在下列哪一時刻的動能最大?",
+              svg: SVG_FIGURES.xt_q12,
+              options: ["10 分", "30 分", "50 分", "90 分"],
+              answerIndex: 0,
+              explanation: "質量固定時速率越大動能越大。0~20分速率 20÷20 = 1 km/min；40~60分速率 10÷20 = 0.5 km/min；70~100分速率 15÷30 = 0.5 km/min；30分靜止速率為 0。故 10 分動能最大。"
+            },
+            {
+              question: "附圖為某貨車在一筆直公路上移動時的位置(x)與時間(t)的關係圖,若貨車上的貨物質量固定不變,下列關於貨物動能的敘述何者錯誤？",
+              svg: SVG_FIGURES.xt_q12,
+              options: [
+                "30 分時的動能大於 10 分時的動能",
+                "10 分時的動能大於 50 分時的動能",
+                "30 分時貨車靜止，動能為零",
+                "50 分與 90 分所在區間的速率大小相同"
+              ],
+              answerIndex: 0,
+              explanation: "⚠️ 題目問「錯誤」！30 分時貨車靜止動能為零，小於 10 分時的動能。"
+            }
+          ]
+        },
+        {
+          id: "w2_q14",
+          hasFigure: true,
+          concept: "【圖形題】木塊反向水平力合力與運動狀態",
+          variants: [
+            {
+              question: "質量為1公斤的木塊放在不同水平面上,並對木塊施以兩個方向相反的水平力,下列選項為木塊的不同受力情形及其運動狀態,哪一項的木塊所受合力大小為2牛頓?",
+              svg: SVG_FIGURES.block_force("2 N", "4 N", "示意圖：兩反向水平力作用於 1 kg 木塊"),
+              options: [
+                "水平力 4 N 與 2 N，向右做加速度運動，加速度大小為 2 m/s²",
+                "水平力 3 N 與 1 N，靜止",
+                "水平力 3 N 與 1 N，向左做等速度直線運動",
+                "水平力 4 N 與 2 N，向左做加速度運動，加速度大小為 1 m/s²"
+              ],
+              answerIndex: 0,
+              explanation: "靜止或等速直線運動合力為 0；m = 1 kg、a = 2 m/s² 時 F = ma = 2 N（4 N 與 2 N 反向合力為 2 N）。"
+            }
+          ]
+        },
+        {
+          id: "w2_q15",
+          hasFigure: true,
+          concept: "【圖形題】施力與位移倍數對動能的影響",
+          variants: [
+            {
+              question: "如附圖，在無摩擦力的水平面靜置一質量M的木塊,今以水平外力F推動此木塊,使其沿力的方向移動距離S,外力對木塊所作的功完全轉換為木塊的動能。若要讓木塊獲得的動能變為原本的2倍,請判斷以下兩人的策略是否合理?\n小雯:施力改為原來的2倍,其餘條件不變。\n小軒:推動距離改為原來的2倍,其餘條件不變。",
+              svg: SVG_FIGURES.push_block("F", "距離 S"),
+              options: ["兩人皆合理", "只有小雯合理", "只有小軒合理", "兩人皆不合理"],
+              answerIndex: 0,
+              explanation: "功 W = F × S 等於木塊獲得的動能。將 F 變 2 倍或將 S 變 2 倍，功皆變為 2 倍，動能也變為 2 倍，故兩人皆合理。"
+            }
+          ]
+        },
+        {
+          id: "w2_g02_1",
+          hasFigure: true,
+          concept: "【圖形題組・籃球彈跳】B 點反彈到 C 點動能與重力位能變化",
+          variants: [
+            {
+              question: "【籃球彈跳題組】如附圖，阿康投籃時,籃球打到籃框、彈到最高點A後落到地面B點,經數次彈跳後靜止在地面D點。假設地面的重力位能為零,考慮籃球撞到地面會消耗能量,忽略空氣阻力不計。籃球落到B點後,往上反彈到C點的過程中,動能與重力位能如何變化?",
+              svg: SVG_FIGURES.basketball,
+              options: ["動能變小;重力位能變大", "動能變大;重力位能變大", "動能變小;重力位能變小", "動能變大;重力位能變小"],
+              answerIndex: 0,
+              explanation: "從 B 點往上反彈到 C 點，高度上升重力位能變大；速率減慢動能變小。"
+            },
+            {
+              question: "【籃球彈跳題組・敘述變形】如附圖，籃球打到籃框彈到最高點A後落到地面B點，在籃球落到B點後往上反彈到C點的過程中，下列敘述何者錯誤？",
+              svg: SVG_FIGURES.basketball,
+              options: ["動能變大;重力位能變小", "動能變小;重力位能變大", "動能轉換為重力位能", "反彈高度上升過程中速率逐漸減慢"],
+              answerIndex: 0,
+              explanation: "⚠️ 題目問「錯誤」！往上反彈過程中是動能變小、重力位能變大。"
+            }
+          ]
+        },
+        {
+          id: "w2_g02_2",
+          hasFigure: true,
+          concept: "【圖形題組・籃球彈跳】A 點與 C 點重力位能大小比較",
+          variants: [
+            {
+              question: "【籃球彈跳題組】如附圖，籃球打到籃框彈到最高點A的重力位能UA,與第一次撞到地面後反彈到C點的重力位能UC相比,何者比較大?為什麼?",
+              svg: SVG_FIGURES.basketball,
+              options: [
+                "UA > UC;因為A點距地面的高度比C點高",
+                "UA = UC;因為要遵守力學能守恆",
+                "UA < UC;因為反彈時會獲得能量",
+                "因為不知道籃球的速率大小,故無法判斷"
+              ],
+              answerIndex: 0,
+              explanation: "撞擊地面會消耗能量使反彈高度降低，A 點高度大於 C 點，故 UA > UC。"
+            },
+            {
+              question: "【籃球彈跳題組・敘述變形】如附圖，籃球撞到地面會消耗能量，關於最高點 A 的重力位能 UA 與反彈最高點 C 的重力位能 UC，下列敘述何者錯誤？",
+              svg: SVG_FIGURES.basketball,
+              options: [
+                "UA = UC;因為忽略空氣阻力所以力學能完全守恆",
+                "UA > UC;因為A點距地面的高度比C點高",
+                "撞擊地面會消耗部分力學能",
+                "C 點的最大高度低於 A 點"
+              ],
+              answerIndex: 0,
+              explanation: "⚠️ 題目問「錯誤」！撞擊地面會消耗能量，UA 大於 UC，並非相等。"
+            }
+          ]
+        },
+        {
+          id: "w2_g02_3",
+          hasFigure: true,
+          concept: "【圖形題組・籃球彈跳】重力位能一直減少／增加的階段",
+          variants: [
+            {
+              question: "【籃球彈跳題組】請由附圖中籃球的運動軌跡判斷（A 為彈起最高點、B 為首次落地點、C 為首次反彈最高點、D 為最終靜止點），下列哪一階段的運動過程，籃球的重力位能會一直減少？",
+              svg: SVG_FIGURES.basketball,
+              options: ["從 A 到 B", "投籃到籃框", "從籃框到 A", "從 B 到 C"],
+              answerIndex: 0,
+              explanation: "A 到 B 是從最高點一路落到地面，高度持續下降，故重力位能一直減少。"
+            },
+            {
+              question: "【籃球彈跳題組・敘述變形】請由附圖中籃球的運動軌跡判斷（A 為彈起最高點、B 為首次落地點、C 為首次反彈最高點、D 為最終靜止點），下列哪一階段的運動過程，籃球的重力位能會一直「增加」？",
+              svg: SVG_FIGURES.basketball,
+              options: ["從 B 到 C", "從 A 到 B", "在地面 D 點靜止時", "從 C 點落回地面時"],
+              answerIndex: 0,
+              explanation: "⚠️ 題目改問「一直增加」！從 B 到 C 高度持續上升，重力位能一直增加。"
+            }
+          ]
+        },
+        {
+          id: "w2_g03_1",
+          hasFigure: true,
+          concept: "【圖形題組・舉重受力】選手給槓鈴作用力 F1 與槓鈴反作用力 F2",
+          variants: [
+            {
+              question: "【舉重題組】選手體重為 59 kgw，於挺舉時舉起 133 kgw 的槓鈴，挺舉成功瞬間人和槓鈴皆維持靜止不動，如附圖所示。此時選手給槓鈴的作用力 F1 與槓鈴給選手的反作用力 F2 為何?",
+              svg: SVG_FIGURES.weightlifting,
+              options: [
+                "F1 = 133 kgw 向上；F2 = 133 kgw 向下",
+                "F1 = 192 kgw 向上；F2 = 192 kgw 向下",
+                "F1 = 59 kgw 向上；F2 = 59 kgw 向下",
+                "F1 = 133 kgw 向下；F2 = 133 kgw 向上"
+              ],
+              answerIndex: 0,
+              explanation: "槓鈴重 133 kgw 且靜止，選手給槓鈴向上的力 F1 = 133 kgw，槓鈴給選手的反作用力 F2 = 133 kgw 向下。"
+            }
+          ]
+        },
+        {
+          id: "w2_g03_2",
+          hasFigure: true,
+          concept: "【圖形題組・舉重受力】選手給地面作用力 F3 與地面反作用力 F4",
+          variants: [
+            {
+              question: "【舉重題組】已知舉重選手體重為 59 kgw，挺舉起 133 kgw 的槓鈴，挺舉成功瞬間人和槓鈴皆維持靜止不動，如附圖所示。此時選手給地面的作用力 F3 與地面給選手的反作用力 F4 為何?",
+              svg: SVG_FIGURES.weightlifting,
+              options: [
+                "F3 = 192 kgw 向下；F4 = 192 kgw 向上",
+                "F3 = 59 kgw 向下；F4 = 59 kgw 向上",
+                "F3 = 133 kgw 向下；F4 = 133 kgw 向上",
+                "F3 = 192 kgw 向上；F4 = 192 kgw 向下"
+              ],
+              answerIndex: 0,
+              explanation: "總重量為 59 + 133 = 192 kgw，靜止時人給地面作用力 F3 = 192 kgw 向下，地面給人反作用力 F4 = 192 kgw 向上。"
+            }
+          ]
+        },
+        {
+          id: "w2_g04_1",
+          hasFigure: true,
+          concept: "【圖形題組・滑水道】等高不同斜度、不同體重之位能與動能判斷",
+          variants: [
+            {
+              question: "【滑水道題組】同學們一起到水上樂園遊玩,園中有高度相同、斜度不同的滑水道,阿康、小軒選擇甲滑水道,沛沛選擇乙滑水道,如附圖所示。已知阿康、小軒、沛沛的體重不同,三人分別從靜止開始滑下滑水道,若忽略摩擦力,則哪位同學的看法正確?",
+              svg: SVG_FIGURES.waterslide,
+              options: [
+                "以上三人的說法皆錯誤",
+                "阿康:因為兩座滑水道的高度相同,所以我們溜下來之前的重力位能相同",
+                "小軒:因為力學能守恆的緣故,所以我們溜到底下時的動能也會相同",
+                "沛沛:因為我選的滑水道坡度較陡,所以我溜到底下時的動能一定最大"
+              ],
+              answerIndex: 0,
+              explanation: "重力位能與落地動能皆與質量有關，三人體重不同故位能與動能皆不同；坡度不同不影響落地動能大小。"
+            },
+            {
+              question: "【滑水道題組・條件變形】如附圖，園中有高度相同、斜度不同的甲、乙兩座滑水道，若阿康、小軒、沛沛三人「體重相同」，分別從滑水道頂端靜止滑下並忽略摩擦力，則溜到底下時何者正確？",
+              svg: SVG_FIGURES.waterslide,
+              options: [
+                "三人溜到底下時的動能相同",
+                "坡度較陡的滑水道，溜到底下時的動能最大",
+                "坡度較緩的滑水道，溜到底下時的動能最大",
+                "三人起點重力位能不同"
+              ],
+              answerIndex: 0,
+              explanation: "體重相同且高度相同，起點位能相同，忽略摩擦力時力學能守恆，底端動能相同。"
+            }
+          ]
+        },
+        {
+          id: "w2_g04_2",
+          hasFigure: true,
+          concept: "【圖形題組・滑水道】受摩擦力影響下滑時能量變化與守恆",
+          variants: [
+            {
+              question: "【滑水道題組】如附圖，沛沛從滑水道頂端靜止下滑，若下滑過程中有受到摩擦力的影響，請推論沛沛下滑過程中其能量變化情形應為下列何者？",
+              svg: SVG_FIGURES.waterslide,
+              options: [
+                "重力位能減少、動能增加,遵守能量守恆定律",
+                "重力位能減少、動能增加,不遵守能量守恆定律",
+                "重力位能增加、動能減少,遵守能量守恆定律",
+                "重力位能增加、動能減少,不遵守能量守恆定律"
+              ],
+              answerIndex: 0,
+              explanation: "下滑時高度降低重力位能減少、速率增加動能增加，摩擦力轉化部分力學能為熱能，總能量仍遵守能量守恆定律。"
+            },
+            {
+              question: "【滑水道題組・敘述變形】如附圖，沛沛從滑水道頂端靜止下滑，若下滑過程中有受到摩擦力的影響，下列關於下滑過程中能量變化的推論何者錯誤？",
+              svg: SVG_FIGURES.waterslide,
+              options: [
+                "重力位能減少、動能增加,不遵守能量守恆定律",
+                "重力位能減少、動能增加,遵守能量守恆定律",
+                "摩擦力會使部分力學能轉化為熱能",
+                "總能量依然保持守恆"
+              ],
+              answerIndex: 0,
+              explanation: "⚠️ 題目問「錯誤」！即使有摩擦力，能量依然遵守能量守恆定律。"
+            }
+          ]
+        },
+        {
+          id: "w2_q02",
+          hasFigure: false,
+          concept: "手提書包作功為零／不為零／正負零敘述",
+          variants: [
+            {
+              question: "下列哪些情況,手對書包所作的功為零?甲.提書包等公車;乙.提書包上車;丙.提書包下車;丁.提書包在斜坡上行走;戊.提書包等速在水平路上行走。",
+              options: ["甲戊", "乙丙", "丙丁", "甲丁"],
+              answerIndex: 0,
+              explanation: "手鉛直向上提書包：甲無位移（W=0）、戊水平位移與施力垂直（W=0）；乙、丙、丁都有鉛直方向位移，作功不為零。"
+            },
+            {
+              question: "下列哪些情況,手對書包所作的功「不為零」?甲.提書包等公車;乙.提書包上車;丙.提書包下車;丁.提書包在斜坡上行走;戊.提書包等速在水平路上行走。",
+              options: ["乙丙丁", "甲乙丙", "甲戊", "丙丁戊"],
+              answerIndex: 0,
+              explanation: "⚠️ 敘述改為「不為零」！乙（上車）、丙（下車）、丁（斜坡行走）皆有鉛直高度變化，作功不為零。"
+            },
+            {
+              question: "下列關於手對書包作功正、負、零的敘述，何者正確？（手施力方向鉛直向上）",
+              options: [
+                "提書包上車作正功、提書包下車作負功、提書包等速在水平路上行走作零功",
+                "提書包上車作負功、提書包下車作正功、提書包等速在水平路上行走作零功",
+                "提書包上車作正功、提書包下車作零功、提書包等速在水平路上行走作負功",
+                "甲、乙、丙、丁、戊五種情況手對書包所作的功皆為零"
+              ],
+              answerIndex: 0,
+              explanation: "施力向上：上車高度上升作正功；下車高度下降作負功；水平行走與施力垂直作零功。"
+            }
+          ]
+        },
+        {
+          id: "w2_q05",
+          hasFigure: false,
+          concept: "質量與重量換算",
+          variants: [
+            {
+              question: "某物體的質量為2公斤,若重力加速度為9.8公尺/秒²,則其重量為多少牛頓?",
+              options: ["19.6", "2", "4.9", "9.8"],
+              answerIndex: 0,
+              explanation: "W = m × g = 2 kg × 9.8 m/s² = 19.6 牛頓。"
+            }
+          ]
+        },
+        {
+          id: "w2_q07",
+          hasFigure: false,
+          concept: "太空船內物體加速度計算",
+          variants: [
+            {
+              question: "太空船內有一個質量為10公克的物體,如果太空人用5牛頓的力量推它,則此物體所獲得的加速度為多少公尺/秒²?",
+              options: ["500", "0.5", "5", "50"],
+              answerIndex: 0,
+              explanation: "⚠️ 單位換算：10 公克 = 0.01 公斤。a = F ÷ m = 5 ÷ 0.01 = 500 m/s²。"
+            }
+          ]
+        },
+        {
+          id: "w2_q08",
+          hasFigure: false,
+          concept: "推動書櫃：反作用力與最大靜摩擦力辨析",
+          variants: [
+            {
+              question: "老師請阿康與小軒移動教室的書櫃,書櫃原本裝滿書,兩人合力仍無法推動書櫃,若將書全部取下後,就可以輕鬆推動空書櫃。兩人對此現象分別解釋如下:\n阿康:由牛頓第三運動定律可知,我們施力推書櫃時,書櫃會產生大小相等、方向相反的反作用力將推力抵消,所以我們推不動書櫃。\n小軒:書櫃裝滿書時,書櫃垂直作用於地面的力較大,因此書櫃與地面間的最大靜摩擦力也較大,所以我們推不動書櫃。\n請判斷兩人的解釋是否合理?",
+              options: ["只有小軒合理", "只有阿康合理", "兩人均合理", "兩人均不合理"],
+              answerIndex: 0,
+              explanation: "作用力與反作用力作用在不同物體上不會抵消（阿康錯）；裝滿書時正向力大，最大靜摩擦力大，取下書後最大靜摩擦力變小（小軒對）。"
+            },
+            {
+              question: "老師請阿康與小軒移動教室的書櫃,書櫃原本裝滿書,兩人合力仍無法推動書櫃,若將書全部取下後,就可以輕鬆推動空書櫃。下列敘述何者錯誤？",
+              options: [
+                "兩人推不動書櫃是因為推力與反作用力互相抵消",
+                "書櫃裝滿書時，對地面的垂直作用力較大",
+                "書櫃裝滿書時，與地面間的最大靜摩擦力較大",
+                "將書全部取下後，最大靜摩擦力減小而較易推動"
+              ],
+              answerIndex: 0,
+              explanation: "⚠️ 題目問「錯誤」！作用力與反作用力作用在不同物體上，不會抵消。"
+            }
+          ]
+        },
+        {
+          id: "w2_q09",
+          hasFigure: false,
+          concept: "灑水車質量減少對加速度與驅動力影響",
+          variants: [
+            {
+              question: "道路上常可以看見環保局出動灑水車清洗路面、降低揚塵。以下是阿康和小軒的對話,請判斷兩人的解釋是否合理?\n阿康:灑水過程中,灑水車的總質量m逐漸減少,若灑水車的驅動力F保持不變,則灑水車的加速度a會逐漸增加。\n小軒:灑水過程中,灑水車的總質量m逐漸減少,若灑水車要保持加速度a不變,則灑水車的驅動力F須逐漸減少。",
+              options: ["兩人均合理", "只有阿康合理", "只有小軒合理", "兩人均不合理"],
+              answerIndex: 0,
+              explanation: "由 F = ma：m 減小時，若 F 不變則 a 增大（阿康合理）；若維持 a 不變，則 F 須減小（小軒合理）。"
+            },
+            {
+              question: "道路上常可以看見環保局出動灑水車清洗路面、降低揚塵。若灑水過程中總質量 m 逐漸減少，且驅動力 F 保持不變，下列敘述何者錯誤？",
+              options: [
+                "灑水車的加速度 a 會逐漸減少",
+                "灑水車的總質量 m 會逐漸減少",
+                "灑水車的加速度 a 會逐漸增加",
+                "符合牛頓第二運動定律 F = ma 的關係"
+              ],
+              answerIndex: 0,
+              explanation: "⚠️ 題目問「錯誤」！m 減小、F 不變時，加速度 a 會逐漸「增加」，不是減少。"
+            }
+          ]
+        },
+        {
+          id: "w2_q13",
+          hasFigure: false,
+          concept: "彈簧逐漸被壓縮時支撐力與彈性位能變化",
+          variants: [
+            {
+              question: "彈簧床內部有一排排的彈簧,當我們躺下時,彈簧會被壓縮,產生支撐的力量。關於彈簧逐漸被壓縮時彈簧的變化,下列推論何者最合理?",
+              options: ["支撐力變大,彈性位能增加", "支撐力變小,彈性位能減少", "支撐力變小,彈性位能增加", "支撐力變大,彈性位能減少"],
+              answerIndex: 0,
+              explanation: "彈簧被壓縮時形變量增大，支撐力變大，儲存的彈性位能也增加。"
+            },
+            {
+              question: "彈簧床內部有一排排的彈簧,當我們躺下時,彈簧會被壓縮,產生支撐的力量。關於彈簧逐漸被壓縮時彈簧的變化,下列推論何者錯誤?",
+              options: ["支撐力變小,彈性位能減少", "支撐力變大,彈性位能增加", "彈簧被壓縮量愈大，儲存的彈性位能愈多", "彈簧對人體產生向上的支撐力"],
+              answerIndex: 0,
+              explanation: "⚠️ 題目改問「錯誤」！壓縮時應是支撐力變大、彈性位能增加。"
+            }
+          ]
+        },
+        {
+          id: "w2_q16",
+          hasFigure: false,
+          concept: "氣泡墊保護易碎品的物理原理",
+          variants: [
+            {
+              question: "在易碎品的運送過程中,我們常會用氣泡墊來包裹物品。請根據氣泡墊的構造,推測下列何者是其能保護物品的原理?",
+              options: [
+                "氣泡墊能增加撞擊到停止的時間,使物品撞擊的加速度減少",
+                "氣泡墊質量小,能減少物品撞擊的力道",
+                "氣泡墊能增加撞擊到停止的時間,使物品撞擊的速度減少",
+                "氣泡墊能增加整體包裹的總質量,使物品撞擊的加速度減少"
+              ],
+              answerIndex: 0,
+              explanation: "氣泡墊能增加撞擊至停止的時間，使加速度減小，進而減小所受撞擊力。"
+            },
+            {
+              question: "在易碎品的運送過程中,我們常會用氣泡墊來包裹物品。下列關於氣泡墊保護原理的敘述，何者錯誤？",
+              options: [
+                "氣泡墊能減少物品落地前的初速度",
+                "氣泡墊能增加撞擊到停止的時間",
+                "氣泡墊能使物品撞擊時的加速度減少",
+                "氣泡墊能減小物品受到的撞擊力道"
+              ],
+              answerIndex: 0,
+              explanation: "⚠️ 題目問「錯誤」！氣泡墊是延長撞擊時間、減小加速度與力道，並非減少落地前的速度。"
+            }
+          ]
+        },
+        {
+          id: "w2_q17",
+          hasFigure: false,
+          concept: "木星與地球重力加速度下質量與重量比較",
+          variants: [
+            {
+              question: "已知木星上的重力加速度大約是地球的2.5倍,下列敘述何者正確?",
+              options: [
+                "同一物體,在地球和木星上的質量相同",
+                "同一物體,在地球和木星上的重量相同",
+                "同一物體,在地球上的重量約為在木星上重量的2.5倍",
+                "同一物體,在地球上的質量約為在木星上質量的2.5倍"
+              ],
+              answerIndex: 0,
+              explanation: "質量不隨地點改變，地球與木星上質量相同；木星重力加速度為地球 2.5 倍，故木星重量是地球 2.5 倍。"
+            },
+            {
+              question: "已知木星上的重力加速度大約是地球的2.5倍,下列敘述何者錯誤?",
+              options: [
+                "同一物體,在地球和木星上的質量不同",
+                "同一物體,在地球和木星上的質量相同",
+                "同一物體,在木星上的重量約為在地球上重量的2.5倍",
+                "同一物體,在地球上的重量約為在木星上重量的 0.4 倍"
+              ],
+              answerIndex: 0,
+              explanation: "⚠️ 題目問「錯誤」！同一物體在地球與木星上的質量「相同」。"
+            }
+          ]
+        },
+        {
+          id: "w2_q18",
+          hasFigure: false,
+          concept: "重物上抬仍不動時的作用力與反作用力計算",
+          variants: [
+            {
+              question: "一塊大石頭重20公斤重,如果阿康用15公斤重的力往上抬,石頭仍然不動,則下列敘述何者錯誤?",
+              options: [
+                "地面給石頭的反作用力為20公斤重",
+                "石頭給阿康的反作用力為15公斤重",
+                "石頭所受的合力為零",
+                "石頭給地面的作用力為5公斤重"
+              ],
+              answerIndex: 0,
+              explanation: "石頭重 20 kgw，往上抬 15 kgw 仍不動，石頭給地面作用力為 20 - 15 = 5 kgw，地面給石頭的反作用力亦為 5 kgw，故說 20 公斤重錯誤。"
+            }
+          ]
+        },
+        {
+          id: "w2_f01_1",
+          hasFigure: false,
+          concept: "【填充轉選擇】拉大行李箱功率計算",
+          variants: [
+            {
+              question: "【習作填充改編】沛沛施50牛頓的水平拉力,花了10秒將大行李箱沿水平直線拉了10公尺拖進家門,則沛沛拉大行李箱時作功的功率為多少瓦特?",
+              options: ["50 瓦特", "250 瓦特", "500 瓦特", "25 瓦特"],
+              answerIndex: 0,
+              explanation: "作功 W = 50 N × 10 m = 500 J；功率 P = W ÷ t = 500 J ÷ 10 s = 50 瓦特。"
+            }
+          ]
+        },
+        {
+          id: "w2_f01_2",
+          hasFigure: false,
+          concept: "【填充轉選擇】拉小行李箱功率計算",
+          variants: [
+            {
+              question: "【習作填充改編】沛沛施40牛頓的水平力,花了8秒將小行李箱沿水平直線拉了10公尺拖進家門,則沛沛拉小行李箱時作功的功率為多少瓦特?",
+              options: ["50 瓦特", "400 瓦特", "320 瓦特", "40 瓦特"],
+              answerIndex: 0,
+              explanation: "作功 W = 40 N × 10 m = 400 J；功率 P = W ÷ t = 400 J ÷ 8 s = 50 瓦特。"
+            }
+          ]
+        },
+        {
+          id: "w2_f02",
+          hasFigure: false,
+          concept: "【填充轉選擇】阿康背書包走水平與上樓作功計算",
+          variants: [
+            {
+              question: "【習作填充改編】阿康背著重量為30牛頓的書包進學校,以固定的速度從校門口水平走了40公尺後,再走樓梯上三樓(一層樓高3.5公尺)抵達教室門口。過程中,阿康對書包作功多少焦耳?(上三樓高度以2層樓高7公尺計算)",
+              options: ["210 焦耳", "1200 焦耳", "1410 焦耳", "105 焦耳"],
+              answerIndex: 0,
+              explanation: "水平走 40 m 不作功；上三樓上升 2 層樓（h = 2 × 3.5 = 7 m），W = 30 N × 7 m = 210 焦耳。"
+            }
+          ]
+        }
+      ]
+    };
+
+    let appConfig = JSON.parse(localStorage.getItem("jim_physics_quiz_cfg")) || JSON.parse(JSON.stringify(DEFAULT_CONFIG));
+    if (!appConfig.teacherEmail) appConfig.teacherEmail = "jim5631@chjhs.tyc.edu.tw";
+    if (!appConfig.googleFormPrefillUrl) {
+      appConfig.googleFormPrefillUrl = DEFAULT_CONFIG.googleFormPrefillUrl;
+    }
+
+    const POINTS_PER_STAGE = 5;
+
+    const ENCOURAGEMENTS = [
+      "💪 過一關得 5 分，每次上線回報總分，採計最高分！",
+      "✨ 做得很好！先看清楚單位再算，段考就穩一半了。",
+      "🔥 保持專注，每一次變數值練習都在幫你累積積分！",
+      "🎯 算式列清楚、單位別漏看，離神秘小禮物越來越近囉！",
+      "🌟 持續推進中，遇到陷阱剛好是考前最賺的提醒！"
+    ];
+
+    let stageHistory = {};
+
+    function pickNonRepeating(list, historyArr) {
+      const unused = list.filter(item => !historyArr.includes(item));
+      if (unused.length > 0) {
+        return unused[Math.floor(Math.random() * unused.length)];
+      }
+      const lastItem = historyArr[historyArr.length - 1];
+      const notLast = list.filter(item => item !== lastItem);
+      const pool = notLast.length > 0 ? notLast : list;
+      return pool[Math.floor(Math.random() * pool.length)];
+    }
+
+    function recordStageSignature(stageId, sig) {
+      if (!stageHistory[stageId]) stageHistory[stageId] = { sigs: [], variantIndices: [] };
+      stageHistory[stageId].sigs.push(sig);
+    }
+
+    function makeUniqueOptions(correctOpt, distractors) {
+      const uniqueDistractors = [];
+      for (const d of distractors) {
+        if (d !== correctOpt && !uniqueDistractors.includes(d)) {
+          uniqueDistractors.push(d);
+        }
+        if (uniqueDistractors.length === 3) break;
+      }
+      const fallbackPool = ["12", "24", "48", "96", "150", "300", "0"];
+      let idx = 0;
+      while (uniqueDistractors.length < 3 && idx < fallbackPool.length) {
+        if (fallbackPool[idx] !== correctOpt && !uniqueDistractors.includes(fallbackPool[idx])) {
+          uniqueDistractors.push(fallbackPool[idx]);
+        }
+        idx++;
+      }
+      return [correctOpt, ...uniqueDistractors.slice(0, 3)];
+    }
+
+    function generateDynamicVariant(stageObj) {
+      const id = stageObj.id;
+      const usedSigs = (stageHistory[id] && stageHistory[id].sigs) || [];
+
+      if (id === "w2_g01_1") {
+        const combos = [
+          { vIn: 20, vOut: 40, ms: 0.5, massG: 140 },
+          { vIn: 30, vOut: 50, ms: 1, massG: 150 },
+          { vIn: 40, vOut: 60, ms: 2, massG: 145 },
+          { vIn: 30, vOut: 70, ms: 2.5, massG: 160 },
+          { vIn: 50, vOut: 40, ms: 1.5, massG: 145 },
+          { vIn: 25, vOut: 55, ms: 0.8, massG: 150 }
+        ];
+        const sigs = combos.map(c => `${c.vIn}-${c.vOut}-${c.ms}-${c.massG}`);
+        const chosenSig = pickNonRepeating(sigs, usedSigs);
+        recordStageSignature(id, chosenSig);
+        const c = combos[sigs.indexOf(chosenSig)];
+        const deltaV = c.vIn + c.vOut;
+        const acc = Math.round(deltaV / (c.ms * 0.001));
+        const secStr = (c.ms * 0.001).toFixed(4).replace(/0+$/, "").replace(/\.$/, "");
+        return {
+          question: `【必考棒球題組・變數值】投手投出秒速 ${c.vIn} 公尺的直球，質量 ${c.massG} 公克的球經 ${c.ms} 毫秒接觸時間，回擊出秒速 ${c.vOut} 公尺的反向飛球（1毫秒＝0.001秒）。擊球瞬間，棒球的加速度大小約多少 m/s²？`,
+          options: makeUniqueOptions(String(acc), [String(Math.round(Math.abs(c.vOut - c.vIn) / (c.ms * 0.001))), String(Math.round(acc / 10)), String(acc * 2)]),
+          answerIndex: 0,
+          explanation: `⚠️ 單位與方向：${c.ms} ms = ${secStr} s。反向回擊速度變化量 Δv = ${c.vOut} - (-${c.vIn}) = ${deltaV} m/s；|a| = ${deltaV} ÷ ${secStr} = ${acc} m/s²。`
+        };
+      }
+
+      if (id === "w2_g01_2") {
+        const combos = [
+          { massG: 120, acc: 50000 },
+          { massG: 150, acc: 80000 },
+          { massG: 180, acc: 50000 },
+          { massG: 200, acc: 60000 },
+          { massG: 160, acc: 75000 },
+          { massG: 250, acc: 40000 }
+        ];
+        const sigs = combos.map(c => `${c.massG}-${c.acc}`);
+        const chosenSig = pickNonRepeating(sigs, usedSigs);
+        recordStageSignature(id, chosenSig);
+        const c = combos[sigs.indexOf(chosenSig)];
+        const forceN = Math.round((c.massG / 1000) * c.acc);
+        const exp10 = Math.floor(Math.log10(forceN));
+        const mantissa = (forceN / Math.pow(10, exp10)).toFixed(2).replace(/\.?0+$/, "");
+        const supExp = String(exp10).split("").map(ch => "⁰¹²³⁴⁵⁶⁷⁸⁹"[ch]).join("");
+        const ansStr = `${mantissa}×10${supExp}`;
+        return {
+          question: `【必考棒球題組・變數值】已知棒球質量為 ${c.massG} 公克，擊球瞬間棒球的加速度大小約為 ${c.acc} m/s²，揮棒擊球時，球棒給球的作用力大小約為多少牛頓？`,
+          options: makeUniqueOptions(ansStr, [`${mantissa}×10³`, `${mantissa}×10⁶`, `${(forceN / 10).toFixed(1)}×10⁴`]),
+          answerIndex: 0,
+          explanation: `⚠️ 單位換算：${c.massG} 公克 = ${c.massG / 1000} 公斤。F = m × a = ${c.massG / 1000} × ${c.acc} = ${forceN} 牛頓（${ansStr} N）。`
+        };
+      }
+
+      if (id === "w2_q11") {
+        const combos = [
+          { mass: 2, mode: "0to4" },
+          { mass: 4, mode: "0to4" },
+          { mass: 6, mode: "0to4" },
+          { mass: 3, mode: "8to10" },
+          { mass: 5, mode: "8to10" },
+          { mass: 4, mode: "8to10" },
+          { mass: 5, mode: "4to8" }
+        ];
+        const sigs = combos.map(c => `${c.mass}-${c.mode}`);
+        const chosenSig = pickNonRepeating(sigs, usedSigs);
+        recordStageSignature(id, chosenSig);
+        const c = combos[sigs.indexOf(chosenSig)];
+        if (c.mode === "0to4") {
+          const fVal = c.mass * 2.5;
+          return {
+            question: `【變數值】如附圖，一質量為 ${c.mass} 公斤的物體在水平面上做向東的直線運動，則在 0～4 秒時間區間內，物體所受的合力大小為多少牛頓？`,
+            svg: SVG_FIGURES.vt_q11,
+            options: makeUniqueOptions(`${fVal} 牛頓`, [`${c.mass * 10} 牛頓`, `${c.mass * 5} 牛頓`, `${c.mass * 20} 牛頓`]),
+            answerIndex: 0,
+            explanation: `0～4 秒內速度由 20 m/s 減至 10 m/s，|a| = (20 - 10) ÷ 4 = 2.5 m/s²。F = m × |a| = ${c.mass} × 2.5 = ${fVal} 牛頓。`
+          };
+        }
+        if (c.mode === "8to10") {
+          const fVal = c.mass * 5;
+          return {
+            question: `【變數值】如附圖，一質量為 ${c.mass} 公斤的物體在水平面上做向東的直線運動，則在 8～10 秒時間區間內，物體所受的合力大小為多少牛頓？`,
+            svg: SVG_FIGURES.vt_q11,
+            options: makeUniqueOptions(`${fVal} 牛頓`, [`${c.mass * 10} 牛頓`, `${c.mass * 2.5} 牛頓`, `0 牛頓`]),
+            answerIndex: 0,
+            explanation: `8～10 秒內速度由 10 m/s 增至 20 m/s，a = (20 - 10) ÷ 2 = 5 m/s²。F = m × a = ${c.mass} × 5 = ${fVal} 牛頓。`
+          };
+        }
+        return {
+          question: `【變數值】如附圖，一質量為 ${c.mass} 公斤的物體在水平面上做向東的直線運動，則在 4～8 秒時間區間內，物體所受的合力大小為多少牛頓？`,
+          svg: SVG_FIGURES.vt_q11,
+          options: makeUniqueOptions("0 牛頓", [`${c.mass * 10} 牛頓`, `${c.mass * 5} 牛頓`, `${c.mass * 2.5} 牛頓`]),
+          answerIndex: 0,
+          explanation: `4～8 秒 v-t 圖為水平線，物體做等速度直線運動（a = 0），故所受合力為 0 牛頓。`
+        };
+      }
+
+      if (id === "w2_q01") {
+        const combos = [
+          { massKg: 10000, acc: 8, timeSec: 10 },
+          { massKg: 15000, acc: 12, timeSec: 5 },
+          { massKg: 12000, acc: 10, timeSec: 8 },
+          { massKg: 10000, acc: 15, timeSec: 6 },
+          { massKg: 15000, acc: 10, timeSec: 9 }
+        ];
+        const sigs = combos.map(c => `${c.massKg}-${c.acc}-${c.timeSec}`);
+        const chosenSig = pickNonRepeating(sigs, usedSigs);
+        recordStageSignature(id, chosenSig);
+        const c = combos[sigs.indexOf(chosenSig)];
+        const thrustN = c.massKg * c.acc;
+        const vEndMs = c.acc * c.timeSec;
+        const vEndKmh = Math.round(vEndMs * 3.6);
+        const thrustExp = `${(thrustN / 10000).toFixed(1).replace(/\.0$/, "")}×10⁴`;
+        const correctOpt = `小軒：戰機從靜止加速到起飛共需要 ${c.timeSec} 秒`;
+        return {
+          question: `【變數值】如附圖，某戰機重量為 ${c.massKg} kgw、起飛推力為 ${thrustExp} N、起飛速率為 ${vEndKmh} km/h，若忽略阻力且重力加速度 g＝10 m/s²，下列哪一位同學的計算正確？`,
+          svg: SVG_FIGURES.f16_card(`${c.massKg} kgw`, `${thrustExp} N`, `${vEndKmh} km/h`),
+          options: makeUniqueOptions(correctOpt, [
+            `阿康：戰機起飛時的加速度為 ${c.acc * 2} m/s²`,
+            `小雯：戰機起飛時的加速度為 ${c.acc / 2} m/s²`,
+            `沛沛：戰機從靜止加速到起飛共需要 ${c.timeSec * 2} 秒`
+          ]),
+          answerIndex: 0,
+          explanation: `⚠️ 單位換算：${vEndKmh} km/h = ${vEndMs} m/s；a = ${thrustN} ÷ ${c.massKg} = ${c.acc} m/s²；加速時間 t = ${vEndMs} ÷ ${c.acc} = ${c.timeSec} 秒。`
+        };
+      }
+
+      if (id === "w2_q14") {
+        const combos = [
+          { mass: 2, fL: 4, fR: 10 },
+          { mass: 3, fL: 5, fR: 14 },
+          { mass: 4, fL: 6, fR: 18 },
+          { mass: 5, fL: 8, fR: 23 },
+          { mass: 2, fL: 7, fR: 15 }
+        ];
+        const sigs = combos.map(c => `${c.mass}-${c.fL}-${c.fR}`);
+        const chosenSig = pickNonRepeating(sigs, usedSigs);
+        recordStageSignature(id, chosenSig);
+        const c = combos[sigs.indexOf(chosenSig)];
+        const netF = c.fR - c.fL;
+        const aVal = netF / c.mass;
+        const ansText = `水平力 ${c.fL} N 與 ${c.fR} N，向右做加速度運動，加速度大小為 ${aVal} m/s²`;
+        return {
+          question: `【變數值】如附圖，質量為 ${c.mass} 公斤的木塊放在水平面上，受到水平向左 ${c.fL} N 與水平向右 ${c.fR} N 的力作用，下列哪一項敘述正確？`,
+          svg: SVG_FIGURES.block_force(`${c.fL} N`, `${c.fR} N`, `木塊質量 = ${c.mass} 公斤`),
+          options: makeUniqueOptions(ansText, [
+            `水平力 ${c.fL} N 與 ${c.fR} N，合力為 ${c.fL + c.fR} N，加速度大小為 ${((c.fL + c.fR) / c.mass).toFixed(1)} m/s²`,
+            `水平力 ${c.fL} N 與 ${c.fR} N，向左做加速度運動，加速度大小為 ${aVal} m/s²`,
+            `兩力互相抵消，木塊維持靜止`
+          ]),
+          answerIndex: 0,
+          explanation: `反向水平力合力 F = ${c.fR} - ${c.fL} = ${netF} N（向右）；加速度 a = F ÷ m = ${netF} ÷ ${c.mass} = ${aVal} m/s²。`
+        };
+      }
+
+      if (id === "w2_q15") {
+        const combos = [
+          { multF: 2, multS: 2 },
+          { multF: 3, multS: 2 },
+          { multF: 2, multS: 3 },
+          { multF: 4, multS: 2 },
+          { multF: 3, multS: 3 }
+        ];
+        const sigs = combos.map(c => `${c.multF}-${c.multS}`);
+        const chosenSig = pickNonRepeating(sigs, usedSigs);
+        recordStageSignature(id, chosenSig);
+        const c = combos[sigs.indexOf(chosenSig)];
+        const totalMult = c.multF * c.multS;
+        return {
+          question: `【變數值】如附圖，在無摩擦力的水平面靜置一質量 M 的木塊，原本以水平外力 F 推動移動距離 S，所作的功完全轉換為動能。若改以 ${c.multF}F 的水平外力推動 ${c.multS}S 的距離，木塊獲得的動能會變為原本的幾倍？`,
+          svg: SVG_FIGURES.push_block(`${c.multF}F`, `距離 ${c.multS}S`),
+          options: makeUniqueOptions(`${totalMult} 倍`, [`${c.multF + c.multS} 倍`, `${c.multF} 倍`, `${c.multS} 倍`]),
+          answerIndex: 0,
+          explanation: `功 W' = (${c.multF}F) × (${c.multS}S) = ${totalMult}FS，故動能變為原本的 ${totalMult} 倍。`
+        };
+      }
+
+      if (id === "w2_g03_1") {
+        const combos = [
+          { bodyW: 58, barW: 120 },
+          { bodyW: 62, barW: 135 },
+          { bodyW: 55, barW: 115 },
+          { bodyW: 64, barW: 140 },
+          { bodyW: 60, barW: 128 }
+        ];
+        const sigs = combos.map(c => `${c.bodyW}-${c.barW}`);
+        const chosenSig = pickNonRepeating(sigs, usedSigs);
+        recordStageSignature(id, chosenSig);
+        const c = combos[sigs.indexOf(chosenSig)];
+        const sumW = c.bodyW + c.barW;
+        return {
+          question: `【舉重題組・變數值】某舉重選手體重為 ${c.bodyW} kgw，於挺舉時舉起 ${c.barW} kgw 的槓鈴，挺舉成功瞬間人和槓鈴皆維持靜止不動，如附圖所示。此時選手給槓鈴的作用力 F1 與槓鈴給選手的反作用力 F2 為何？`,
+          svg: SVG_FIGURES.weightlifting,
+          options: makeUniqueOptions(
+            `F1 = ${c.barW} kgw 向上；F2 = ${c.barW} kgw 向下`,
+            [
+              `F1 = ${sumW} kgw 向上；F2 = ${sumW} kgw 向下`,
+              `F1 = ${c.bodyW} kgw 向上；F2 = ${c.bodyW} kgw 向下`,
+              `F1 = ${c.barW} kgw 向下；F2 = ${c.barW} kgw 向上`
+            ]
+          ),
+          answerIndex: 0,
+          explanation: `槓鈴重 ${c.barW} kgw 且靜止，選手給槓鈴向上的力 F1 = ${c.barW} kgw，槓鈴給選手的反作用力 F2 = ${c.barW} kgw 向下。`
+        };
+      }
+
+      if (id === "w2_g03_2") {
+        const combos = [
+          { bodyW: 58, barW: 120 },
+          { bodyW: 62, barW: 135 },
+          { bodyW: 55, barW: 115 },
+          { bodyW: 64, barW: 140 },
+          { bodyW: 60, barW: 128 }
+        ];
+        const sigs = combos.map(c => `${c.bodyW}-${c.barW}`);
+        const chosenSig = pickNonRepeating(sigs, usedSigs);
+        recordStageSignature(id, chosenSig);
+        const c = combos[sigs.indexOf(chosenSig)];
+        const sumW = c.bodyW + c.barW;
+        return {
+          question: `【舉重題組・變數值】已知舉重選手體重為 ${c.bodyW} kgw，挺舉起 ${c.barW} kgw 的槓鈴，挺舉成功瞬間人和槓鈴皆維持靜止不動，如附圖所示。此時選手給地面的作用力 F3 與地面給選手的反作用力 F4 為何？`,
+          svg: SVG_FIGURES.weightlifting,
+          options: makeUniqueOptions(
+            `F3 = ${sumW} kgw 向下；F4 = ${sumW} kgw 向上`,
+            [
+              `F3 = ${c.bodyW} kgw 向下；F4 = ${c.bodyW} kgw 向上`,
+              `F3 = ${c.barW} kgw 向下；F4 = ${c.barW} kgw 向上`,
+              `F3 = ${sumW} kgw 向上；F4 = ${sumW} kgw 向下`
+            ]
+          ),
+          answerIndex: 0,
+          explanation: `總重量為 ${c.bodyW} + ${c.barW} = ${sumW} kgw，靜止時人給地面作用力 F3 = ${sumW} kgw 向下，地面給人反作用力 F4 = ${sumW} kgw 向上。`
+        };
+      }
+
+      if (id === "w2_q05") {
+        const combos = [
+          { massG: 250, gVal: 9.8 },
+          { massG: 500, gVal: 9.8 },
+          { massG: 750, gVal: 9.8 },
+          { massG: 1500, gVal: 9.8 },
+          { massG: 400, gVal: 10 },
+          { massG: 800, gVal: 10 }
+        ];
+        const sigs = combos.map(c => `${c.massG}-${c.gVal}`);
+        const chosenSig = pickNonRepeating(sigs, usedSigs);
+        recordStageSignature(id, chosenSig);
+        const c = combos[sigs.indexOf(chosenSig)];
+        const weightN = Number(((c.massG / 1000) * c.gVal).toFixed(2));
+        return {
+          question: `【變數值】某物體的質量為 ${c.massG} 公克，若重力加速度為 ${c.gVal} 公尺/秒²，則其重量為多少牛頓？`,
+          options: makeUniqueOptions(String(weightN), [String(c.massG * c.gVal), String((weightN * 2).toFixed(2)), String((weightN / 2).toFixed(2))]),
+          answerIndex: 0,
+          explanation: `⚠️ 單位換算：${c.massG} 公克 = ${c.massG / 1000} 公斤。W = m × g = ${c.massG / 1000} × ${c.gVal} = ${weightN} 牛頓。`
+        };
+      }
+
+      if (id === "w2_q07") {
+        const combos = [
+          { massG: 50, forceN: 15 },
+          { massG: 100, forceN: 20 },
+          { massG: 200, forceN: 10 },
+          { massG: 250, forceN: 15 },
+          { massG: 40, forceN: 12 },
+          { massG: 20, forceN: 8 }
+        ];
+        const sigs = combos.map(c => `${c.massG}-${c.forceN}`);
+        const chosenSig = pickNonRepeating(sigs, usedSigs);
+        recordStageSignature(id, chosenSig);
+        const c = combos[sigs.indexOf(chosenSig)];
+        const acc = Math.round(c.forceN / (c.massG / 1000));
+        return {
+          question: `【變數值】太空船內有一個質量為 ${c.massG} 公克的物體，若太空人用 ${c.forceN} 牛頓的水平力量推它，則此物體所獲得的加速度大小為多少公尺/秒²？`,
+          options: makeUniqueOptions(String(acc), [String((c.forceN / c.massG).toFixed(2)), String(acc / 10), String(acc * 2)]),
+          answerIndex: 0,
+          explanation: `⚠️ 單位換算：${c.massG} 公克 = ${c.massG / 1000} 公斤。a = F ÷ m = ${c.forceN} ÷ ${c.massG / 1000} = ${acc} m/s²。`
+        };
+      }
+
+      if (id === "w2_q18") {
+        const combos = [
+          { stoneW: 25, liftF: 15 },
+          { stoneW: 30, liftF: 18 },
+          { stoneW: 35, liftF: 20 },
+          { stoneW: 40, liftF: 25 },
+          { stoneW: 28, liftF: 16 }
+        ];
+        const sigs = combos.map(c => `${c.stoneW}-${c.liftF}`);
+        const chosenSig = pickNonRepeating(sigs, usedSigs);
+        recordStageSignature(id, chosenSig);
+        const c = combos[sigs.indexOf(chosenSig)];
+        const groundF = c.stoneW - c.liftF;
+        return {
+          question: `【變數值】一塊大石頭重 ${c.stoneW} 公斤重，如果阿康用 ${c.liftF} 公斤重的力往上抬，石頭仍然不動，則石頭給地面的作用力與地面給石頭的反作用力大小各為多少公斤重？`,
+          options: makeUniqueOptions(
+            `皆為 ${groundF} 公斤重`,
+            [
+              `皆為 ${c.stoneW} 公斤重`,
+              `皆為 ${c.liftF} 公斤重`,
+              `作用力 ${groundF} 公斤重、反作用力 ${c.stoneW} 公斤重`
+            ]
+          ),
+          answerIndex: 0,
+          explanation: `石頭重 ${c.stoneW} kgw，往上抬 ${c.liftF} kgw 仍不動，石頭壓地面的作用力為 ${c.stoneW} - ${c.liftF} = ${groundF} kgw，地面給石頭的反作用力亦為 ${groundF} 公斤重。`
+        };
+      }
+
+      if (id === "w2_f01_1" || id === "w2_f01_2") {
+        const combos = [
+          { forceN: 30, distM: 12, timeS: 6 },
+          { forceN: 40, distM: 15, timeS: 10 },
+          { forceN: 60, distM: 10, timeS: 12 },
+          { forceN: 50, distM: 12, timeS: 15 },
+          { forceN: 45, distM: 8, timeS: 6 },
+          { forceN: 80, distM: 15, timeS: 20 }
+        ];
+        const sigs = combos.map(c => `${c.forceN}-${c.distM}-${c.timeS}`);
+        const chosenSig = pickNonRepeating(sigs, usedSigs);
+        recordStageSignature(id, chosenSig);
+        const c = combos[sigs.indexOf(chosenSig)];
+        const workJ = c.forceN * c.distM;
+        const powerW = Math.round(workJ / c.timeS);
+        const targetLabel = id === "w2_f01_1" ? "大行李箱" : "小行李箱";
+        return {
+          question: `【變數值】施 ${c.forceN} 牛頓的水平拉力，花了 ${c.timeS} 秒將${targetLabel}沿水平直線拉了 ${c.distM} 公尺，則作功的功率為多少瓦特？`,
+          options: makeUniqueOptions(`${powerW} 瓦特`, [`${workJ} 瓦特`, `${c.forceN * c.timeS} 瓦特`, `${powerW * 2} 瓦特`]),
+          answerIndex: 0,
+          explanation: `作功 W = F × s = ${c.forceN} × ${c.distM} = ${workJ} 焦耳；功率 P = W ÷ t = ${workJ} ÷ ${c.timeS} = ${powerW} 瓦特。`
+        };
+      }
+
+      if (id === "w2_f02") {
+        const combos = [
+          { weightN: 20, horizM: 30, floorH: 3.5, climbFloors: 2 },
+          { weightN: 40, horizM: 50, floorH: 3, climbFloors: 2 },
+          { weightN: 30, horizM: 45, floorH: 4, climbFloors: 2 },
+          { weightN: 50, horizM: 60, floorH: 3, climbFloors: 3 },
+          { weightN: 25, horizM: 40, floorH: 3.2, climbFloors: 2 }
+        ];
+        const sigs = combos.map(c => `${c.weightN}-${c.horizM}-${c.floorH}-${c.climbFloors}`);
+        const chosenSig = pickNonRepeating(sigs, usedSigs);
+        recordStageSignature(id, chosenSig);
+        const c = combos[sigs.indexOf(chosenSig)];
+        const hTotal = Number((c.floorH * c.climbFloors).toFixed(1));
+        const workJ = Math.round(c.weightN * hTotal);
+        return {
+          question: `【變數值】背著重量為 ${c.weightN} 牛頓的書包，先沿水平道路走了 ${c.horizM} 公尺，再走樓梯往上爬了 ${c.climbFloors} 層樓（每層樓高 ${c.floorH} 公尺）。過程中，對書包作功多少焦耳？`,
+          options: makeUniqueOptions(`${workJ} 焦耳`, [`${c.weightN * c.horizM} 焦耳`, `${c.weightN * c.horizM + workJ} 焦耳`, `${Math.round(workJ / 2)} 焦耳`]),
+          answerIndex: 0,
+          explanation: `水平走 ${c.horizM} m 不作功；往上爬 ${c.climbFloors} 層樓高度 h = ${c.climbFloors} × ${c.floorH} = ${hTotal} m，W = ${c.weightN} × ${hTotal} = ${workJ} 焦耳。`
+        };
+      }
+
+      return null;
+    }
+
+    function getFiveDigitCode() {
+      const cls = (studentInfo.className || "").replace(/\D/g, "").slice(0, 3).padStart(3, "0");
+      const seat = (studentInfo.seat || "").replace(/\D/g, "").slice(-2).padStart(2, "0");
+      return `${cls}${seat}`;
+    }
+
+    let studentInfo = { className: "", seat: "", name: "" };
+    let shuffledStageIndices = [];
+    let completedStageIndices = [];
+    let stageRecords = [];
+    let currentStageIdx = 0;
+    let currentVariant = null;
+    let currentShuffledOptions = [];
+    let currentCorrectDisplayIdx = -1;
+    let isCurrentQuestionPassed = false;
+    let streakCount = 0;
+    let totalAttempts = 0;
+    let currentStageAttempts = 0;
+    let startTime = null;
+    let endTime = null;
+    let verifyCode = "";
+    let clockInterval = null;
+
+    function shuffleArray(arr) {
+      const copy = [...arr];
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    }
+
+    function buildOrderedStageIndices() {
+      const priorityIndices = [];
+      const figureIndices = [];
+      const textIndices = [];
+
+      appConfig.questions.forEach((q, idx) => {
+        if (typeof q.priority === "number") {
+          priorityIndices.push({ idx, priority: q.priority });
+        } else if (q.hasFigure || (q.variants && q.variants[0] && q.variants[0].svg)) {
+          figureIndices.push(idx);
+        } else {
+          textIndices.push(idx);
+        }
+      });
+
+      priorityIndices.sort((a, b) => a.priority - b.priority);
+      return [
+        ...priorityIndices.map(item => item.idx),
+        ...shuffleArray(figureIndices),
+        ...shuffleArray(textIndices)
+      ];
+    }
+
+    function initApp() {
+      const total = appConfig.questions.length;
+      document.getElementById("login-exam-title").textContent = appConfig.examTitle;
+      document.getElementById("app-main-title").textContent = `Jim 理化｜${appConfig.examTitle}`;
+      document.getElementById("total-stages-count").textContent = total;
+      document.getElementById("total-max-score").textContent = total * POINTS_PER_STAGE;
+      initScratchpad();
+      startLiveClockLoop();
+    }
+
+    function formatClockTime(d) {
+      return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}:${String(d.getSeconds()).padStart(2, "0")}`;
+    }
+
+    function startLiveClockLoop() {
+      if (clockInterval) clearInterval(clockInterval);
+      clockInterval = setInterval(() => {
+        const clockEl = document.getElementById("question-live-clock");
+        if (clockEl) clockEl.textContent = formatClockTime(new Date());
+      }, 1000);
+    }
+
+    function startNewChallenge() {
+      let c = document.getElementById("input-class").value.trim();
+      let s = document.getElementById("input-seat").value.trim();
+      let n = document.getElementById("input-name").value.trim();
+      const errBox = document.getElementById("login-error");
+
+      const digitsOnly = c.replace(/\D/g, "");
+      if (digitsOnly.length === 5 && !s) {
+        c = digitsOnly.slice(0, 3);
+        s = digitsOnly.slice(3, 5);
+        document.getElementById("input-class").value = c;
+        document.getElementById("input-seat").value = s;
+      }
+
+      if (!c || !s || !n) {
+        errBox.textContent = "請完整填寫「班級、座號、姓名」才能開始計分與闖關！";
+        errBox.classList.remove("hidden", "animate-shake");
+        void errBox.offsetWidth;
+        errBox.classList.add("animate-shake");
+        return;
+      }
+      errBox.classList.add("hidden");
+
+      const normSeat = s.padStart(2, "0");
+      studentInfo = { className: c, seat: normSeat, name: n };
+      shuffledStageIndices = buildOrderedStageIndices();
+      completedStageIndices = [];
+      stageHistory = {};
+      stageRecords = shuffledStageIndices.map((qIdx, orderIdx) => ({
+        order: orderIdx + 1,
+        concept: appConfig.questions[qIdx].concept,
+        passed: false,
+        score: 0,
+        attempts: 0,
+        passedTime: ""
+      }));
+
+      currentStageIdx = 0;
+      streakCount = 0;
+      totalAttempts = 0;
+      currentStageAttempts = 0;
+      startTime = new Date();
+      endTime = null;
+
+      document.getElementById("student-badge").textContent = `${studentInfo.className} ${studentInfo.seat}號 ${studentInfo.name}`;
+      document.getElementById("code-badge").textContent = `編號：${getFiveDigitCode()}`;
+      document.getElementById("max-stage-num").textContent = shuffledStageIndices.length;
+
+      document.getElementById("view-login").classList.add("hidden");
+      document.getElementById("view-record").classList.add("hidden");
+      document.getElementById("view-quiz").classList.remove("hidden");
+      document.getElementById("view-quiz").classList.add("flex");
+
+      document.getElementById("btn-record-submit").classList.remove("hidden");
+      document.getElementById("btn-record-submit").classList.add("flex");
+      document.getElementById("btn-toggle-scratchpad").classList.remove("hidden");
+      document.getElementById("btn-toggle-scratchpad").classList.add("flex");
+
+      loadStageQuestion(false);
+    }
+
+    function getCurrentScore() {
+      return completedStageIndices.length * POINTS_PER_STAGE;
+    }
+
+    function updateScoreAndProgressUI() {
+      const total = shuffledStageIndices.length;
+      const doneCount = completedStageIndices.length;
+      const remCount = Math.max(0, total - doneCount);
+      const score = getCurrentScore();
+
+      document.getElementById("current-score").textContent = score;
+      document.getElementById("completed-count").textContent = doneCount;
+      document.getElementById("remaining-count").textContent = remCount;
+      document.getElementById("progress-bar").style.width = `${(doneCount / total) * 100}%`;
+
+      let msg = ENCOURAGEMENTS[doneCount % ENCOURAGEMENTS.length];
+      if (remCount > 0 && remCount <= 5) {
+        msg = `🏁 快拿到神秘小禮物了！只剩最後 ${remCount} 題，目前總分 ${score} 分！`;
+      } else if (doneCount > 0 && doneCount % 5 === 0) {
+        msg = `🎉 已過 ${doneCount} 關、累積 ${score} 分！繼續衝刺全破神秘小禮物！`;
+      }
+      document.getElementById("encouragement-text").textContent = msg;
+    }
+
+    function loadStageQuestion(isRetry) {
+      isCurrentQuestionPassed = false;
+      if (!isRetry) currentStageAttempts = 0;
+
+      const realQuestionIndex = shuffledStageIndices[currentStageIdx];
+      const stageObj = appConfig.questions[realQuestionIndex];
+      const variants = stageObj.variants || [];
+
+      const dynamicVar = generateDynamicVariant(stageObj);
+      if (dynamicVar) {
+        currentVariant = dynamicVar;
+      } else {
+        if (!stageHistory[stageObj.id]) stageHistory[stageObj.id] = { sigs: [], variantIndices: [] };
+        const usedIndices = stageHistory[stageObj.id].variantIndices;
+        const altIndices = variants.map((_, idx) => idx).filter(idx => idx > 0);
+        const preferredPool = altIndices.length ? altIndices : variants.map((_, idx) => idx);
+        const vIdx = pickNonRepeating(preferredPool, usedIndices);
+        usedIndices.push(vIdx);
+        currentVariant = variants[vIdx];
+      }
+
+      updateScoreAndProgressUI();
+
+      const streakBadge = document.getElementById("streak-badge");
+      if (streakCount >= 2) {
+        streakBadge.textContent = `🔥 連對 ${streakCount} 題`;
+        streakBadge.classList.remove("hidden");
+      } else {
+        streakBadge.classList.add("hidden");
+      }
+
+      document.getElementById("question-concept-tag").textContent = `第 ${currentStageIdx + 1} 關｜${stageObj.concept}`;
+      document.getElementById("variant-tag").textContent = isRetry
+        ? `🔄 續作新變數值題（本關通過得 5 分）`
+        : `🎲 變數值變形・通過得 5 分`;
+      document.getElementById("question-text").textContent = currentVariant.question;
+      document.getElementById("question-live-clock").textContent = formatClockTime(new Date());
+
+      const figBox = document.getElementById("question-figure-box");
+      if (currentVariant.svg) {
+        figBox.innerHTML = currentVariant.svg;
+        figBox.classList.remove("hidden");
+      } else {
+        figBox.innerHTML = "";
+        figBox.classList.add("hidden");
+      }
+
+      const optionItems = currentVariant.options.map((optText, idx) => ({
+        text: optText,
+        isCorrect: idx === currentVariant.answerIndex
+      }));
+      currentShuffledOptions = shuffleArray(optionItems);
+      currentCorrectDisplayIdx = currentShuffledOptions.findIndex(item => item.isCorrect);
+
+      const optContainer = document.getElementById("options-container");
+      optContainer.innerHTML = "";
+      const labels = ["A", "B", "C", "D"];
+
+      currentShuffledOptions.forEach((optItem, idx) => {
+        const btn = document.createElement("button");
+        btn.className = "option-btn w-full text-left p-4 sm:p-5 rounded-2xl border-2 border-slate-200 bg-slate-50/70 hover:bg-indigo-50/50 hover:border-indigo-300 flex items-center gap-4 group";
+        btn.onclick = () => submitAnswer(idx, btn);
+        btn.innerHTML = `
+          <span class="opt-letter w-10 h-10 rounded-xl bg-white border-2 border-slate-300 group-hover:border-indigo-500 group-hover:text-indigo-600 flex items-center justify-center font-black text-lg shrink-0 transition">
+            ${labels[idx]}
+          </span>
+          <span class="text-lg sm:text-xl font-bold text-slate-800">${optItem.text}</span>
+        `;
+        optContainer.appendChild(btn);
+      });
+
+      document.getElementById("feedback-box").classList.add("hidden");
+      clearScratchpad();
+    }
+
+    function submitAnswer(selectedDisplayIdx, clickedBtn) {
+      totalAttempts++;
+      currentStageAttempts++;
+      const allBtns = document.querySelectorAll("#options-container button");
+      allBtns.forEach(b => b.disabled = true);
+
+      const isCorrect = currentShuffledOptions[selectedDisplayIdx].isCorrect;
+      const fbBox = document.getElementById("feedback-box");
+      const fbIcon = document.getElementById("feedback-icon");
+      const fbTitle = document.getElementById("feedback-title");
+      const fbSub = document.getElementById("feedback-subtitle");
+      const expText = document.getElementById("explanation-text");
+      const nextBtn = document.getElementById("btn-next-action");
+
+      expText.textContent = currentVariant.explanation;
+      fbBox.classList.remove("hidden", "bg-emerald-50", "border-emerald-300", "bg-rose-50", "border-rose-300");
+
+      if (isCorrect) {
+        isCurrentQuestionPassed = true;
+        streakCount++;
+        const realIdx = shuffledStageIndices[currentStageIdx];
+        if (!completedStageIndices.includes(realIdx)) {
+          completedStageIndices.push(realIdx);
+        }
+
+        stageRecords[currentStageIdx].passed = true;
+        stageRecords[currentStageIdx].score = POINTS_PER_STAGE;
+        stageRecords[currentStageIdx].attempts = currentStageAttempts;
+        stageRecords[currentStageIdx].passedTime = formatClockTime(new Date());
+
+        updateScoreAndProgressUI();
+
+        const remAfter = Math.max(0, shuffledStageIndices.length - completedStageIndices.length);
+        const nowScore = getCurrentScore();
+
+        clickedBtn.classList.remove("border-slate-200", "bg-slate-50/70");
+        clickedBtn.classList.add("border-emerald-500", "bg-emerald-50", "ring-2", "ring-emerald-200");
+        clickedBtn.querySelector(".opt-letter").classList.add("bg-emerald-500", "text-white", "border-emerald-500");
+
+        fbBox.classList.add("bg-emerald-50", "border-emerald-300");
+        fbIcon.className = "w-8 h-8 rounded-full bg-emerald-500 text-white flex items-center justify-center shrink-0 font-black text-lg mt-0.5";
+        fbIcon.textContent = "✓";
+        fbTitle.className = "font-black text-lg sm:text-xl text-emerald-900";
+        fbTitle.textContent = remAfter > 0
+          ? `通過本關（+5 分）！目前總分 ${nowScore} 分，還剩 ${remAfter} 題！`
+          : `太強了！全部關卡通過，獲得滿分 ${nowScore} 分！`;
+        fbSub.className = "text-sm font-medium mt-0.5 text-emerald-700";
+        fbSub.textContent = "確認一下解題關鍵，繼續往下一關前進：";
+
+        nextBtn.className = "w-full py-4 rounded-2xl font-black text-lg text-white bg-emerald-600 hover:bg-emerald-500 shadow-md transition active:scale-[0.99] flex items-center justify-center gap-2";
+        nextBtn.innerHTML = remAfter > 0
+          ? `<span>前往下一題（已過 ${completedStageIndices.length} 關・${nowScore} 分）➔</span>`
+          : `<span>🎁 完成全部闖關！前往查看記錄並領取神秘小禮物</span>`;
+      } else {
+        isCurrentQuestionPassed = false;
+        streakCount = 0;
+        stageRecords[currentStageIdx].attempts = currentStageAttempts;
+
+        clickedBtn.classList.remove("border-slate-200", "bg-slate-50/70");
+        clickedBtn.classList.add("border-rose-500", "bg-rose-50");
+        clickedBtn.querySelector(".opt-letter").classList.add("bg-rose-500", "text-white", "border-rose-500");
+
+        const correctBtn = allBtns[currentCorrectDisplayIdx];
+        correctBtn.classList.remove("border-slate-200", "bg-slate-50/70");
+        correctBtn.classList.add("border-emerald-500", "bg-emerald-50");
+        correctBtn.querySelector(".opt-letter").classList.add("bg-emerald-500", "text-white", "border-emerald-500");
+
+        fbBox.classList.add("bg-rose-50", "border-rose-300");
+        fbIcon.className = "w-8 h-8 rounded-full bg-rose-500 text-white flex items-center justify-center shrink-0 font-black text-lg mt-0.5";
+        fbIcon.textContent = "!";
+        fbTitle.className = "font-black text-lg sm:text-xl text-rose-900";
+        fbTitle.textContent = "差一點點！本關尚未通過（+0 分）：";
+        fbSub.className = "text-sm font-medium mt-0.5 text-rose-700";
+        fbSub.textContent = "答錯請續作新變數值類似題，一關通過方可進下一關！";
+
+        nextBtn.className = "w-full py-4 rounded-2xl font-black text-lg text-white bg-rose-600 hover:bg-rose-500 shadow-md transition active:scale-[0.99] flex items-center justify-center gap-2";
+        nextBtn.innerHTML = `<span>續作類似題（本關通過方可進下一關）↻</span>`;
+      }
+
+      setTimeout(() => {
+        fbBox.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      }, 100);
+    }
+
+    function handleNextStep() {
+      if (isCurrentQuestionPassed) {
+        if (completedStageIndices.length >= shuffledStageIndices.length) {
+          triggerRecordAndSendScore(true);
+        } else {
+          currentStageIdx++;
+          loadStageQuestion(false);
+        }
+      } else {
+        loadStageQuestion(true);
+      }
+    }
+
+    function getDurationText(targetEnd) {
+      const endRef = targetEnd || new Date();
+      const diffSec = Math.max(1, Math.round((endRef - startTime) / 1000));
+      const mins = Math.floor(diffSec / 60);
+      const secs = diffSec % 60;
+      return mins > 0 ? `${mins}分${secs}秒` : `${secs}秒`;
+    }
+
+    function buildVerifyCode(scoreVal, timestampNum) {
+      const fiveCode = getFiveDigitCode();
+      const rawStr = `${fiveCode}-${studentInfo.name}-${scoreVal}-${timestampNum}`;
+      let hash = 0;
+      for (let i = 0; i < rawStr.length; i++) {
+        hash = ((hash << 5) - hash) + rawStr.charCodeAt(i);
+        hash |= 0;
+      }
+      const hexCode = Math.abs(hash).toString(16).toUpperCase().padStart(4, "0").slice(0, 4);
+      return `JIM-${fiveCode}-${scoreVal}P-${hexCode}`;
+    }
+
+    function setSubmitStatusBanner(type, text) {
+      const banner = document.getElementById("submit-status-banner");
+      banner.classList.remove("hidden", "bg-emerald-50", "border-emerald-300", "text-emerald-950", "bg-amber-50", "border-amber-300", "text-amber-950");
+      if (type === "success") {
+        banner.classList.add("bg-emerald-50", "border-emerald-300", "text-emerald-950");
+      } else {
+        banner.classList.add("bg-amber-50", "border-amber-300", "text-amber-950");
+      }
+      banner.innerHTML = text;
+    }
+
+    function triggerRecordAndSendScore(isAllCompleted) {
+      const now = new Date();
+      if (isAllCompleted) endTime = now;
+
+      const total = shuffledStageIndices.length;
+      const passedCount = completedStageIndices.length;
+      const score = getCurrentScore();
+      verifyCode = buildVerifyCode(score, now.getTime());
+
+      document.getElementById("rec-score").textContent = score;
+      document.getElementById("rec-passed").textContent = passedCount;
+      document.getElementById("rec-total").textContent = total;
+      document.getElementById("rec-attempts").textContent = totalAttempts;
+      document.getElementById("rec-duration").textContent = getDurationText(now);
+      document.getElementById("rec-student-label").textContent =
+        `${studentInfo.className} 班 ${studentInfo.seat} 號 ${studentInfo.name}（${getFiveDigitCode()}）`;
+
+      const banner = document.getElementById("submit-status-banner");
+      banner.classList.add("hidden");
+
+      const giftBox = document.getElementById("mystery-gift-box");
+      const backBtn = document.getElementById("btn-back-to-quiz");
+      const titleEl = document.getElementById("record-main-title");
+      const iconEl = document.getElementById("record-top-icon");
+
+      if (isAllCompleted || passedCount >= total) {
+        iconEl.textContent = "🏆";
+        titleEl.textContent = "恭喜完成全部挑戰！";
+        giftBox.classList.remove("hidden");
+        document.getElementById("gift-verify-code").textContent = verifyCode;
+        backBtn.classList.add("hidden");
+      } else {
+        iconEl.textContent = "📊";
+        titleEl.textContent = "本次闖關記錄與總分";
+        giftBox.classList.add("hidden");
+        backBtn.classList.remove("hidden");
+      }
+
+      const listEl = document.getElementById("record-detail-list");
+      listEl.innerHTML = "";
+      stageRecords.forEach(rec => {
+        const row = document.createElement("div");
+        row.className = rec.passed
+          ? "flex items-center justify-between gap-2 bg-white px-3.5 py-2.5 rounded-xl border border-emerald-200"
+          : "flex items-center justify-between gap-2 bg-white px-3.5 py-2.5 rounded-xl border border-slate-200 opacity-75";
+        row.innerHTML = `
+          <div class="font-bold text-slate-800 truncate">
+            ${rec.passed ? "✅" : "⬜"} 第 ${rec.order} 關｜${rec.concept}
+          </div>
+          <div class="shrink-0 font-mono text-xs font-bold ${rec.passed ? "text-emerald-700" : "text-slate-400"}">
+            ${rec.passed ? `+${rec.score}分（${rec.attempts}次・${rec.passedTime}）` : "未完成"}
+          </div>
+        `;
+        listEl.appendChild(row);
+      });
+
+      document.getElementById("view-login").classList.add("hidden");
+      document.getElementById("view-quiz").classList.add("hidden");
+      document.getElementById("view-quiz").classList.remove("flex");
+      document.getElementById("btn-record-submit").classList.add("hidden");
+      document.getElementById("btn-toggle-scratchpad").classList.add("hidden");
+      document.getElementById("scratchpad-drawer").classList.add("hidden");
+      document.getElementById("view-record").classList.remove("hidden");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function submitScoreNow() {
+      const total = shuffledStageIndices.length;
+      const passedCount = completedStageIndices.length;
+      const score = getCurrentScore();
+      const sentClock = formatClockTime(new Date());
+      const summaryText = `${studentInfo.className} ${studentInfo.seat}號 ${studentInfo.name}｜總分：${score}分（${passedCount}/${total}關）`;
+
+      const formUrlStr = (appConfig.googleFormPrefillUrl || DEFAULT_CONFIG.googleFormPrefillUrl || "").trim();
+      const entryKeys = [];
+
+      if (formUrlStr && formUrlStr.includes("docs.google.com/forms")) {
+        try {
+          const urlObj = new URL(formUrlStr);
+          urlObj.searchParams.forEach((_, k) => {
+            if (k.startsWith("entry.") && !entryKeys.includes(k)) {
+              entryKeys.push(k);
+            }
+          });
+
+          if (entryKeys.length >= 1) {
+            const postUrl = urlObj.origin + urlObj.pathname.replace(/\/viewform$/, "/formResponse");
+            const hiddenForm = document.getElementById("bg-form-sender");
+            hiddenForm.action = postUrl;
+            hiddenForm.innerHTML = "";
+
+            const addHiddenField = (name, val) => {
+              const inp = document.createElement("input");
+              inp.type = "hidden";
+              inp.name = name;
+              inp.value = val;
+              hiddenForm.appendChild(inp);
+            };
+
+            addHiddenField(entryKeys[0], summaryText);
+            if (entryKeys.length >= 2) {
+              addHiddenField(entryKeys[1], String(score));
+            }
+            hiddenForm.submit();
+
+            const payload = new URLSearchParams();
+            payload.append(entryKeys[0], summaryText);
+            if (entryKeys.length >= 2) payload.append(entryKeys[1], String(score));
+            fetch(postUrl, { method: "POST", mode: "no-cors", body: payload }).catch(() => {});
+
+            setSubmitStatusBanner(
+              "success",
+              `✅ 已於 <strong>${sentClock}</strong> 在背景自動送出總分與記錄：<br>` +
+              `<strong>${studentInfo.className} ${studentInfo.seat}號 ${studentInfo.name}</strong>・本次總分 <strong>${score} 分</strong>（已過 ${passedCount}/${total} 關），下方為您的個人闖關記錄。`
+            );
+            return;
+          }
+        } catch (e) {}
+      }
+
+      setSubmitStatusBanner(
+        "warning",
+        `⚠️ 目前表單連結尚未包含 <code>entry.</code> 欄位編號，已為您保留本次記錄（<strong>${studentInfo.className} ${studentInfo.seat}號 ${studentInfo.name}・總分 ${score} 分</strong>）。請到右上角「Jim 管理後臺」貼上「預先填寫表單」產生的含 <code>entry.</code> 連結並儲存，即可在背景自動送出。`
+      );
+    }
+
+    function returnToQuizFromRecord() {
+      document.getElementById("view-record").classList.add("hidden");
+      document.getElementById("view-quiz").classList.remove("hidden");
+      document.getElementById("view-quiz").classList.add("flex");
+      document.getElementById("btn-record-submit").classList.remove("hidden");
+      document.getElementById("btn-record-submit").classList.add("flex");
+      document.getElementById("btn-toggle-scratchpad").classList.remove("hidden");
+      document.getElementById("btn-toggle-scratchpad").classList.add("flex");
+    }
+
+    function resetToHome() {
+      startTime = null;
+      document.getElementById("view-record").classList.add("hidden");
+      document.getElementById("view-quiz").classList.add("hidden");
+      document.getElementById("view-quiz").classList.remove("flex");
+      document.getElementById("btn-record-submit").classList.add("hidden");
+      document.getElementById("btn-toggle-scratchpad").classList.add("hidden");
+      document.getElementById("view-login").classList.remove("hidden");
+    }
+
+    let padCanvas, padCtx, isDrawing = false, penColor = "#1e293b";
+
+    function initScratchpad() {
+      padCanvas = document.getElementById("scratchpad-canvas");
+      padCtx = padCanvas.getContext("2d");
+
+      const getPos = (e) => {
+        const rect = padCanvas.getBoundingClientRect();
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        return { x: clientX - rect.left, y: clientY - rect.top };
+      };
+
+      const startDraw = (e) => {
+        isDrawing = true;
+        const pos = getPos(e);
+        padCtx.beginPath();
+        padCtx.moveTo(pos.x, pos.y);
+      };
+
+      const moveDraw = (e) => {
+        if (!isDrawing) return;
+        e.preventDefault();
+        const pos = getPos(e);
+        padCtx.lineTo(pos.x, pos.y);
+        padCtx.stroke();
+      };
+
+      const endDraw = () => { isDrawing = false; };
+
+      padCanvas.addEventListener("mousedown", startDraw);
+      padCanvas.addEventListener("mousemove", moveDraw);
+      window.addEventListener("mouseup", endDraw);
+      padCanvas.addEventListener("touchstart", startDraw, { passive: false });
+      padCanvas.addEventListener("touchmove", moveDraw, { passive: false });
+      window.addEventListener("touchend", endDraw);
+    }
+
+    function toggleScratchpad() {
+      const drawer = document.getElementById("scratchpad-drawer");
+      drawer.classList.toggle("hidden");
+      if (!drawer.classList.contains("hidden")) {
+        const rect = padCanvas.getBoundingClientRect();
+        if (padCanvas.width !== rect.width) {
+          padCanvas.width = rect.width;
+          padCanvas.height = rect.height;
+          padCtx.lineCap = "round";
+          padCtx.lineJoin = "round";
+          padCtx.lineWidth = 3;
+          padCtx.strokeStyle = penColor;
+        }
+      }
+    }
+
+    function setPenColor(color) {
+      penColor = color;
+      if (padCtx) padCtx.strokeStyle = color;
+    }
+
+    function clearScratchpad() {
+      if (padCtx && padCanvas) padCtx.clearRect(0, 0, padCanvas.width, padCanvas.height);
+    }
+
+    function openTeacherLogin() {
+      document.getElementById("teacher-modal").classList.remove("hidden");
+      document.getElementById("teacher-auth-box").classList.remove("hidden");
+      document.getElementById("teacher-panel-box").classList.add("hidden");
+      document.getElementById("teacher-pwd-input").value = "";
+    }
+
+    function closeTeacherModal() {
+      document.getElementById("teacher-modal").classList.add("hidden");
+    }
+
+    function verifyTeacherPwd() {
+      const pwd = document.getElementById("teacher-pwd-input").value.trim();
+      if (pwd === "18662") {
+        document.getElementById("teacher-auth-box").classList.add("hidden");
+        document.getElementById("teacher-panel-box").classList.remove("hidden");
+        document.getElementById("cfg-exam-title").value = appConfig.examTitle;
+        document.getElementById("cfg-google-form-url").value = appConfig.googleFormPrefillUrl || DEFAULT_CONFIG.googleFormPrefillUrl;
+        document.getElementById("cfg-teacher-email").value = appConfig.teacherEmail || "jim5631@chjhs.tyc.edu.tw";
+        document.getElementById("cfg-questions-json").value = JSON.stringify(appConfig.questions, null, 2);
+      } else {
+        alert("密碼錯誤，請重新輸入！");
+      }
+    }
+
+    function saveTeacherConfig() {
+      try {
+        const newTitle = document.getElementById("cfg-exam-title").value.trim() || "習作類似題-精熟挑戰";
+        const newFormUrl = document.getElementById("cfg-google-form-url").value.trim() || DEFAULT_CONFIG.googleFormPrefillUrl;
+        const newEmail = document.getElementById("cfg-teacher-email").value.trim() || "jim5631@chjhs.tyc.edu.tw";
+        const newQuestions = JSON.parse(document.getElementById("cfg-questions-json").value);
+        if (!Array.isArray(newQuestions) || newQuestions.length === 0) throw new Error("題庫不能為空");
+
+        appConfig = {
+          examTitle: newTitle,
+          googleFormPrefillUrl: newFormUrl,
+          teacherEmail: newEmail,
+          questions: newQuestions
+        };
+        localStorage.setItem("jim_physics_quiz_cfg", JSON.stringify(appConfig));
+        initApp();
+        alert("✅ 設定已儲存！後臺視窗已為您保留，可直接點擊右邊「匯出含新題庫之獨立 HTML 檔」。");
+      } catch (err) {
+        alert("❌ 題庫 JSON 格式有誤：\n" + err.message);
+      }
+    }
+
+    function restoreDefaultQuestions() {
+      if (confirm("確定要恢復為內建的「習作原題變形題庫（含圖形與必考棒球題組）」嗎？")) {
+        document.getElementById("cfg-questions-json").value = JSON.stringify(DEFAULT_CONFIG.questions, null, 2);
+      }
+    }
+
+    function jumpToCompletionForAdmin() {
+      if (!studentInfo.name) {
+        const inputC = document.getElementById("input-class").value.trim() || "909";
+        const inputS = (document.getElementById("input-seat").value.trim() || "20").padStart(2, "0");
+        const inputN = document.getElementById("input-name").value.trim() || "測試同學";
+        studentInfo = { className: inputC, seat: inputS, name: inputN };
+      }
+      if (!shuffledStageIndices.length) {
+        shuffledStageIndices = appConfig.questions.map((_, idx) => idx);
+      }
+      completedStageIndices = [...shuffledStageIndices];
+      totalAttempts = shuffledStageIndices.length;
+      if (!startTime) startTime = new Date(Date.now() - 185 * 1000);
+      stageRecords = shuffledStageIndices.map((qIdx, orderIdx) => ({
+        order: orderIdx + 1,
+        concept: appConfig.questions[qIdx].concept,
+        passed: true,
+        score: POINTS_PER_STAGE,
+        attempts: 1,
+        passedTime: formatClockTime(new Date())
+      }));
+
+      closeTeacherModal();
+      triggerRecordAndSendScore(true);
+    }
+
+    function exportStandaloneHTML() {
+      try {
+        const newTitle = document.getElementById("cfg-exam-title").value.trim() || "習作類似題-精熟挑戰";
+        const newFormUrl = document.getElementById("cfg-google-form-url").value.trim() || DEFAULT_CONFIG.googleFormPrefillUrl;
+        const newEmail = document.getElementById("cfg-teacher-email").value.trim() || "jim5631@chjhs.tyc.edu.tw";
+        const newQuestions = JSON.parse(document.getElementById("cfg-questions-json").value);
+        const updatedConfig = {
+          examTitle: newTitle,
+          googleFormPrefillUrl: newFormUrl,
+          teacherEmail: newEmail,
+          questions: newQuestions
+        };
+
+        let htmlSource = document.documentElement.outerHTML;
+        const targetRegex = /const DEFAULT_CONFIG = \{[\s\S]*?\n    \};/;
+        const replacement = `const DEFAULT_CONFIG = ${JSON.stringify(updatedConfig, null, 6)};`;
+
+        if (!targetRegex.test(htmlSource)) {
+          alert("匯出發生異常，請先點擊「儲存設定」即可正常使用。");
+          return;
+        }
+
+        htmlSource = "<!DOCTYPE html>\n" + htmlSource.replace(targetRegex, replacement);
+        const blob = new Blob([htmlSource], { type: "text/html;charset=utf-8" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `Jim理化_${newTitle}_平板闖關版.html`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      } catch (err) {
+        alert("❌ 匯出失敗：\n" + err.message);
+      }
+    }
+
+    window.addEventListener("DOMContentLoaded", initApp);
+  </script>
+</body>
+</html>
