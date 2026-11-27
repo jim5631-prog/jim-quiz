@@ -338,9 +338,9 @@
         </div>
 
         <div class="bg-emerald-50/70 p-4 rounded-2xl border border-emerald-200 space-y-2">
-          <label class="block text-sm font-bold text-emerald-950">2. Google 表單預先填入連結（建議貼上含 entry. 欄位的連結，背景自動送出）</label>
+          <label class="block text-sm font-bold text-emerald-950">2. Google 表單預先填入連結（已內建 entry. 欄位，背景自動送出）</label>
           <input id="cfg-google-form-url" type="url" placeholder="https://docs.google.com/forms/d/e/.../viewform?usp=pp_url&entry.xxx=...&entry.yyy=..." class="w-full px-3.5 py-2.5 rounded-xl border border-emerald-300 bg-white text-xs font-mono" />
-          <p class="text-xs text-emerald-800">從表單右上角「⋮ → 預先填寫表單」填入測試值並取得連結後貼入此處，系統會在背景直接送出至 <code>formResponse</code>。</p>
+          <p class="text-xs text-emerald-800">系統會在背景直接送出至 <code>formResponse</code>，避免學生在表單畫面修改分數。</p>
         </div>
 
         <div class="bg-indigo-50/70 p-4 rounded-2xl border border-indigo-100">
@@ -588,8 +588,8 @@
 
     const DEFAULT_CONFIG = {
       examTitle: "習作類似題-精熟挑戰",
+      googleFormPrefillUrl: "https://docs.google.com/forms/d/e/1FAIpQLSeBgjKulR9nd2Hz7ALatCAgZ_q0l3gq6ypfI7SEHsQMo52BhQ/viewform?usp=pp_url&entry.1587732683=11&entry.1876833673=22",
       teacherEmail: "jim5631@chjhs.tyc.edu.tw",
-      googleFormPrefillUrl: "https://docs.google.com/forms/d/e/1FAIpQLSeBgjKulR9nd2Hz7ALatCAgZ_q0l3gq6ypfI7SEHsQMo52BhQ/viewform?usp=header",
       questions: [
         {
           id: "w2_g01_1",
@@ -1725,11 +1725,28 @@
     }
 
     function initApp() {
+      appConfig.googleFormPrefillUrl = "https://docs.google.com/forms/d/e/1FAIpQLSeBgjKulR9nd2Hz7ALatCAgZ_q0l3gq6ypfI7SEHsQMo52BhQ/viewform?usp=pp_url&entry.1587732683=11&entry.1876833673=22";
+      localStorage.setItem("jim_physics_quiz_cfg", JSON.stringify(appConfig));
       const total = appConfig.questions.length;
       document.getElementById("login-exam-title").textContent = appConfig.examTitle;
       document.getElementById("app-main-title").textContent = `Jim 理化｜${appConfig.examTitle}`;
       document.getElementById("total-stages-count").textContent = total;
       document.getElementById("total-max-score").textContent = total * POINTS_PER_STAGE;
+
+      // 確保每次開啟皆從乾淨的學生登入首頁開始，不殘留測試畫面或後臺視窗
+      document.getElementById("view-login").classList.remove("hidden");
+      document.getElementById("view-quiz").classList.add("hidden");
+      document.getElementById("view-quiz").classList.remove("flex");
+      document.getElementById("view-record").classList.add("hidden");
+      document.getElementById("teacher-modal").classList.add("hidden");
+      document.getElementById("scratchpad-drawer").classList.add("hidden");
+      document.getElementById("btn-record-submit").classList.add("hidden");
+      document.getElementById("btn-record-submit").classList.remove("flex");
+      document.getElementById("btn-toggle-scratchpad").classList.add("hidden");
+      document.getElementById("btn-toggle-scratchpad").classList.remove("flex");
+      document.getElementById("submit-status-banner").classList.add("hidden");
+      document.getElementById("bg-form-sender").innerHTML = "";
+
       initScratchpad();
       startLiveClockLoop();
     }
@@ -2107,56 +2124,34 @@
       const sentClock = formatClockTime(new Date());
       const summaryText = `${studentInfo.className} ${studentInfo.seat}號 ${studentInfo.name}｜總分：${score}分（${passedCount}/${total}關）`;
 
-      const formUrlStr = (appConfig.googleFormPrefillUrl || DEFAULT_CONFIG.googleFormPrefillUrl || "").trim();
-      const entryKeys = [];
+      const entryKeys = ["entry.1587732683", "entry.1876833673"];
+      const postUrl = "https://docs.google.com/forms/d/e/1FAIpQLSeBgjKulR9nd2Hz7ALatCAgZ_q0l3gq6ypfI7SEHsQMo52BhQ/formResponse";
 
-      if (formUrlStr && formUrlStr.includes("docs.google.com/forms")) {
-        try {
-          const urlObj = new URL(formUrlStr);
-          urlObj.searchParams.forEach((_, k) => {
-            if (k.startsWith("entry.") && !entryKeys.includes(k)) {
-              entryKeys.push(k);
-            }
-          });
+      const hiddenForm = document.getElementById("bg-form-sender");
+      hiddenForm.action = postUrl;
+      hiddenForm.innerHTML = "";
 
-          if (entryKeys.length >= 1) {
-            const postUrl = urlObj.origin + urlObj.pathname.replace(/\/viewform$/, "/formResponse");
-            const hiddenForm = document.getElementById("bg-form-sender");
-            hiddenForm.action = postUrl;
-            hiddenForm.innerHTML = "";
+      const addHiddenField = (name, val) => {
+        const inp = document.createElement("input");
+        inp.type = "hidden";
+        inp.name = name;
+        inp.value = val;
+        hiddenForm.appendChild(inp);
+      };
 
-            const addHiddenField = (name, val) => {
-              const inp = document.createElement("input");
-              inp.type = "hidden";
-              inp.name = name;
-              inp.value = val;
-              hiddenForm.appendChild(inp);
-            };
+      addHiddenField(entryKeys[0], summaryText);
+      addHiddenField(entryKeys[1], String(score));
+      hiddenForm.submit();
 
-            addHiddenField(entryKeys[0], summaryText);
-            if (entryKeys.length >= 2) {
-              addHiddenField(entryKeys[1], String(score));
-            }
-            hiddenForm.submit();
-
-            const payload = new URLSearchParams();
-            payload.append(entryKeys[0], summaryText);
-            if (entryKeys.length >= 2) payload.append(entryKeys[1], String(score));
-            fetch(postUrl, { method: "POST", mode: "no-cors", body: payload }).catch(() => {});
-
-            setSubmitStatusBanner(
-              "success",
-              `✅ 已於 <strong>${sentClock}</strong> 在背景自動送出總分與記錄：<br>` +
-              `<strong>${studentInfo.className} ${studentInfo.seat}號 ${studentInfo.name}</strong>・本次總分 <strong>${score} 分</strong>（已過 ${passedCount}/${total} 關），下方為您的個人闖關記錄。`
-            );
-            return;
-          }
-        } catch (e) {}
-      }
+      const payload = new URLSearchParams();
+      payload.append(entryKeys[0], summaryText);
+      payload.append(entryKeys[1], String(score));
+      fetch(postUrl, { method: "POST", mode: "no-cors", body: payload }).catch(() => {});
 
       setSubmitStatusBanner(
-        "warning",
-        `⚠️ 目前表單連結尚未包含 <code>entry.</code> 欄位編號，已為您保留本次記錄（<strong>${studentInfo.className} ${studentInfo.seat}號 ${studentInfo.name}・總分 ${score} 分</strong>）。請到右上角「Jim 管理後臺」貼上「預先填寫表單」產生的含 <code>entry.</code> 連結並儲存，即可在背景自動送出。`
+        "success",
+        `✅ 已於 <strong>${sentClock}</strong> 在背景自動送出總分與記錄：<br>` +
+        `<strong>${studentInfo.className} ${studentInfo.seat}號 ${studentInfo.name}</strong>・本次總分 <strong>${score} 分</strong>（已過 ${passedCount}/${total} 關），下方為您的個人闖關記錄。`
       );
     }
 
